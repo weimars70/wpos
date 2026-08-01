@@ -1,0 +1,6 @@
+TABLE: view_compras
+codigo, fechahora, usuario, proveedor_ident, proveedor_nombre, forma_pago, n_forma_pago, plazo, factura, factura_fecha, total, subtotal, descuento, iva, estado, saldo, empresa_id, n_sucursal, total_unidades
+--------------------
+TABLE: salidas_movimientos
+id, codigo_salida, debito, credito, efectivo, cambio, fecha, empresa_id, medio_pago, cuenta, banco, transaccion, nota, fecha_registro
+--------------------

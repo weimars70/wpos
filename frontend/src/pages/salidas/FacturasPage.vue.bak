@@ -1,0 +1,565 @@
+<template>
+  <q-page class="column aurora-animate" style="min-height: 100vh; padding: 24px;">
+    <!-- Main Billing Container -->
+    <div class="glass-card q-pa-lg shadow-24 full-width no-border" style="border-radius: 20px;">
+      
+      <!-- Premium Header -->
+      <div class="row items-center q-mb-lg">
+        <q-icon name="receipt_long" size="md" color="blue-2" class="q-mr-md" />
+        <div>
+          <div class="text-h4 text-weight-bold text-gradient">Nueva Factura</div>
+          <div class="text-blue-2 opacity-70">Emisión de comprobante de venta</div>
+        </div>
+        <q-space />
+        <div class="row q-gutter-sm">
+          <q-btn
+            color="primary"
+            icon="save"
+            label="Guardar"
+            class="premium-btn"
+            @click="guardar"
+          />
+          <q-btn
+            color="secondary"
+            outline
+            icon="save_as"
+            label="Guardar Otros"
+            class="premium-btn"
+            @click="guardarOtros"
+          />
+        </div>
+      </div>
+
+      <!-- Header section -->
+      <div class="row q-col-gutter-lg q-mb-xl">
+        <div class="col-12 col-md-4">
+          <q-select
+            v-model="factura.cliente"
+            :options="clienteOptions"
+            label="Cliente*"
+            dark
+            label-color="blue-2"
+            outlined
+            dense
+            use-input
+            fill-input
+            hide-selected
+            input-debounce="0"
+            class="q-input-premium"
+            @filter="filterClientes"
+          >
+            <template #prepend><q-icon name="person" color="blue-2" /></template>
+          </q-select>
+        </div>
+        <div class="col-12 col-md-4">
+          <q-input
+            v-model="factura.direccion"
+            label="Dirección"
+            dark
+            label-color="blue-2"
+            outlined
+            dense
+            class="q-input-premium"
+          >
+            <template #prepend><q-icon name="place" color="blue-2" /></template>
+          </q-input>
+        </div>
+        <div class="col-12 col-md-4 row q-col-gutter-sm">
+          <div class="col-6">
+            <q-select
+              v-model="factura.formaPago"
+              :options="formasPago"
+              label="Forma pago*"
+              dark
+              label-color="blue-2"
+              outlined
+              dense
+              class="q-input-premium"
+            />
+          </div>
+          <div class="col-6">
+            <q-input
+              v-model.number="factura.plazo"
+              label="Plazo (días)*"
+              type="number"
+              dark
+              label-color="blue-2"
+              outlined
+              dense
+              class="q-input-premium"
+            />
+          </div>
+        </div>
+      </div>
+
+      <q-separator dark class="q-my-lg opacity-20" />
+
+      <!-- Item entry row -->
+      <div class="row q-col-gutter-md items-end q-mb-lg">
+        <div class="col-12 col-md-3">
+          <q-select
+            v-model="itemRow.item"
+            :options="productoOptions"
+            label="Buscar Item*"
+            dark
+            label-color="blue-2"
+            outlined
+            dense
+            use-input
+            input-debounce="400"
+            class="q-input-premium"
+            @filter="filterProductos"
+            @update:model-value="onItemSelected"
+          >
+            <template #prepend><q-icon name="search" color="blue-2" /></template>
+            <template #no-option>
+              <q-item>
+                <q-item-section class="text-grey">Sin resultados</q-item-section>
+              </q-item>
+            </template>
+          </q-select>
+        </div>
+        <div class="col-12 col-md-1">
+          <q-input
+            v-model="itemRow.talla"
+            label="Talla"
+            dark
+            label-color="blue-2"
+            outlined
+            dense
+            class="q-input-premium text-center"
+          />
+        </div>
+        <div class="col-12 col-md-1">
+          <q-select
+            v-model="itemRow.color"
+            :options="colores"
+            label="Color"
+            dark
+            label-color="blue-2"
+            outlined
+            dense
+            class="q-input-premium"
+          />
+        </div>
+        <div class="col-12 col-md-1">
+          <q-input
+            v-model.number="itemRow.iva"
+            label="%Iva"
+            type="number"
+            dark
+            label-color="blue-2"
+            outlined
+            dense
+            class="q-input-premium"
+            @update:model-value="recalcItem"
+          />
+        </div>
+        <div class="col-12 col-md-2">
+          <q-input
+            v-model.number="itemRow.precio"
+            label="Precio Venta"
+            type="number"
+            dark
+            label-color="blue-2"
+            outlined
+            dense
+            class="q-input-premium"
+            prefix="$"
+            @update:model-value="recalcItem"
+          />
+        </div>
+        <div class="col-12 col-md-1">
+          <q-input
+            v-model.number="itemRow.descuento"
+            label="%Desc"
+            type="number"
+            dark
+            label-color="blue-2"
+            outlined
+            dense
+            class="q-input-premium"
+            @update:model-value="recalcItem"
+          />
+        </div>
+        <div class="col-12 col-md-1">
+          <q-input
+            ref="inputCantidad"
+            v-model.number="itemRow.cantidad"
+            label="Cant.*"
+            type="number"
+            dark
+            label-color="blue-2"
+            outlined
+            dense
+            class="q-input-premium"
+            @update:model-value="recalcItem"
+            @keyup.enter="addItem"
+          />
+        </div>
+        <div class="col-12 col-md-2">
+          <q-input
+            v-model="itemRow.subtotal"
+            label="Subtotal"
+            dark
+            label-color="blue-2"
+            outlined
+            dense
+            readonly
+            class="q-input-premium bg-blue-grey-10"
+            prefix="$"
+          />
+        </div>
+        <div class="col-auto">
+          <q-btn
+            color="primary"
+            icon="add"
+            flat
+            round
+            dense
+            size="lg"
+            class="q-ml-sm"
+            @click="addItem"
+          >
+            <q-tooltip>Agregar a la lista</q-tooltip>
+          </q-btn>
+        </div>
+      </div>
+
+      <!-- Items table -->
+      <div class="q-mb-xl">
+        <q-table
+          :rows="items"
+          :columns="columns"
+          row-key="__index"
+          dark
+          flat
+          class="glass-table"
+          :rows-per-page-options="[0]"
+          hide-pagination
+          no-data-label="Aún no has agregado productos"
+        >
+          <template #body-cell-item="props">
+            <q-td :props="props">
+              <div class="text-weight-bold text-blue-2">{{ props.row.item }}</div>
+              <div class="text-caption opacity-70">{{ props.row.descripcion }}</div>
+            </q-td>
+          </template>
+          <template #body-cell-acciones="props">
+            <q-td :props="props" auto-width>
+              <q-btn
+                icon="delete"
+                color="red-5"
+                flat
+                dense
+                round
+                @click="removeItem(props.rowIndex)"
+              />
+            </q-td>
+          </template>
+        </q-table>
+      </div>
+
+      <!-- Footer totals -->
+      <div class="row justify-end">
+        <div class="col-12 col-md-4 glass-card q-pa-lg" style="background: rgba(255,255,255,0.05)">
+          <div class="row q-mb-sm">
+            <div class="text-blue-2 opacity-70">Subtotal</div>
+            <q-space />
+            <div class="text-weight-bold">$ {{ totales.subtotal }}</div>
+          </div>
+          <div class="row q-mb-sm">
+            <div class="text-blue-2 opacity-70">Iva</div>
+            <q-space />
+            <div class="text-weight-bold">$ {{ totales.iva }}</div>
+          </div>
+          <div class="row q-mb-md">
+            <div class="text-blue-2 opacity-70">Descuento</div>
+            <q-space />
+            <div class="text-weight-bold text-red-4">-$ {{ totales.descuento }}</div>
+          </div>
+          <q-separator dark class="q-my-sm opacity-20" />
+          <div class="row items-center q-mt-sm">
+            <div class="text-h6 text-blue-2 text-weight-bold">TOTAL</div>
+            <q-space />
+            <div class="text-h4 text-weight-bold text-gradient">$ {{ totales.total }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </q-page>
+</template>
+
+<script setup lang="ts">
+import { ref, reactive, watch } from 'vue';
+import { useQuasar } from 'quasar';
+import { useAuthStore } from 'src/stores/auth';
+import { salidasApi } from 'src/api/salidas';
+
+const $q = useQuasar();
+const authStore = useAuthStore();
+
+// ---- Factura header ----
+const factura = reactive({
+  cliente: null as string | null,
+  direccion: '',
+  formaPago: null as string | null,
+  plazo: 0,
+  tipo: 'Factura',
+  vendedor: null as string | null,
+});
+
+const formasPago = ['EFECTIVO', 'CRÉDITO', 'TRANSFERENCIA'];
+
+// Placeholder options — replace with real API calls
+const allClientes = ['Cliente A', 'Cliente B', 'Cliente C'];
+const allVendedores = ['Vendedor 1', 'Vendedor 2', 'Vendedor 3'];
+const allProductos = ['Producto A', 'Producto B', 'Producto C'];
+
+const clienteOptions = ref([...allClientes]);
+const vendedorOptions = ref([...allVendedores]);
+const productoOptions = ref<any[]>([]);
+
+const colores = ['Rojo', 'Azul', 'Verde', 'Negro', 'Blanco', 'Otro'];
+
+function filterClientes(val: string, update: (cb: () => void) => void) {
+  update(() => {
+    const needle = val.toLowerCase();
+    clienteOptions.value = allClientes.filter((c) =>
+      c.toLowerCase().includes(needle)
+    );
+  });
+}
+
+function abortClienteFilter() {
+  clienteOptions.value = [...allClientes];
+}
+
+function filterVendedores(val: string, update: (cb: () => void) => void) {
+  update(() => {
+    const needle = val.toLowerCase();
+    vendedorOptions.value = allVendedores.filter((v) =>
+      v.toLowerCase().includes(needle)
+    );
+  });
+}
+
+async function filterProductos(val: string, update: (cb: () => void) => void) {
+  if (val.length < 2) {
+    update(() => {
+      productoOptions.value = [];
+    });
+    return;
+  }
+  try {
+    const { data } = await salidasApi.getItems(val);
+    update(() => {
+      productoOptions.value = data.map((i: any) => ({
+        label: `${i.item} — ${i.descripcion}`,
+        value: i.item,
+        data: i,
+      }));
+    });
+  } catch (err) {
+    console.error('Error al buscar items:', err);
+    update(() => {
+      productoOptions.value = [];
+    });
+  }
+}
+
+function onItemSelected(selected: any) {
+  if (!selected) return;
+  // selected puede ser el objeto opción completo (cuando no tiene emit-value)
+  const opt = typeof selected === 'object' && selected.data
+    ? selected
+    : productoOptions.value.find((o) => o.value === selected);
+  if (!opt?.data) return;
+  const i = opt.data;
+  itemRow.item = opt.value;
+  itemRow.descripcion = i.descripcion ?? '';
+  itemRow.iva = i.por_iva ?? 0;
+  itemRow.precio = i.ult_pventa ?? 0;
+  recalcItem();
+  setTimeout(() => {
+    if (inputCantidad.value) {
+      inputCantidad.value.focus();
+      (inputCantidad.value as any).select?.();
+    }
+  }, 100);
+}
+
+// ---- Item entry row ----
+const defaultItemRow = () => ({
+  item: null as string | null,
+  descripcion: '',
+  talla: '',
+  color: null as string | null,
+  iva: 0,
+  precio: 0,
+  descuento: 0,
+  pvFinal: '0.00',
+  pvIva: '0.00',
+  cantidad: 1,
+  subtotal: '0.00',
+});
+
+const itemRow = reactive(defaultItemRow());
+const inputCantidad = ref<any>(null);
+
+
+function recalcItem() {
+  const precio = Number(itemRow.precio) || 0;
+  const desc = Number(itemRow.descuento) || 0;
+  const iva = Number(itemRow.iva) || 0;
+  const cant = Number(itemRow.cantidad) || 0;
+
+  const pvFinal = precio * (1 - desc / 100);
+  const pvIva = pvFinal * (iva / 100);
+  const subtotal = pvFinal * cant;
+
+  itemRow.pvFinal = pvFinal.toFixed(2);
+  itemRow.pvIva = pvIva.toFixed(2);
+  itemRow.subtotal = subtotal.toFixed(2);
+}
+
+// ---- Items list ----
+interface ItemFactura {
+  item: string | null;
+  descripcion: string;
+  talla: string;
+  color: string | null;
+  iva: number;
+  precio: number;
+  descuento: number;
+  pvFinal: number;
+  pvIva: number;
+  cantidad: number;
+  subtotal: number;
+}
+
+const items = ref<ItemFactura[]>([]);
+
+function addItem() {
+  if (!itemRow.item) {
+    $q.notify({ type: 'warning', message: 'Seleccione un item antes de agregar.' });
+    return;
+  }
+  items.value.push({
+    item: itemRow.item,
+    descripcion: '',
+    talla: itemRow.talla,
+    color: itemRow.color,
+    iva: Number(itemRow.iva),
+    precio: Number(itemRow.precio),
+    descuento: Number(itemRow.descuento),
+    pvFinal: parseFloat(itemRow.pvFinal),
+    pvIva: parseFloat(itemRow.pvIva),
+    cantidad: Number(itemRow.cantidad),
+    subtotal: parseFloat(itemRow.subtotal),
+  });
+  Object.assign(itemRow, defaultItemRow());
+}
+
+function removeItem(index: number) {
+  items.value.splice(index, 1);
+}
+
+// ---- Table columns ----
+const columns = [
+  { name: 'item', label: 'Item', field: 'item', align: 'left' as const },
+  { name: 'descripcion', label: 'Descripción', field: 'descripcion', align: 'left' as const },
+  { name: 'talla', label: 'Talla', field: 'talla', align: 'center' as const },
+  { name: 'color', label: 'Color', field: 'color', align: 'center' as const },
+  { name: 'iva', label: '%Iva', field: 'iva', align: 'center' as const },
+  { name: 'precio', label: 'P/Venta', field: 'precio', align: 'right' as const, format: (v: number) => `$${v.toFixed(2)}` },
+  { name: 'descuento', label: '% Desc', field: 'descuento', align: 'center' as const },
+  { name: 'pvFinal', label: 'P/Final', field: 'pvFinal', align: 'right' as const, format: (v: number) => `$${v.toFixed(2)}` },
+  { name: 'pvIva', label: 'P/Iva', field: 'pvIva', align: 'right' as const, format: (v: number) => `$${v.toFixed(2)}` },
+  { name: 'cantidad', label: 'Cant', field: 'cantidad', align: 'center' as const },
+  { name: 'subtotal', label: 'Subtotal', field: 'subtotal', align: 'right' as const, format: (v: number) => `$${v.toFixed(2)}` },
+  { name: 'acciones', label: '', field: 'acciones', align: 'center' as const },
+];
+
+// ---- Totals ----
+const totales = reactive({
+  subtotal: '0.00',
+  descuento: '0.00',
+  iva: '0.00',
+  total: '0.00',
+});
+
+watch(
+  items,
+  (list) => {
+    let subtotal = 0;
+    let descuento = 0;
+    let iva = 0;
+
+    for (const it of list) {
+      subtotal += it.pvFinal * it.cantidad;
+      descuento += (it.precio * (it.descuento / 100)) * it.cantidad;
+      iva += it.pvIva * it.cantidad;
+    }
+
+    const total = subtotal + iva;
+    totales.subtotal = subtotal.toFixed(2);
+    totales.descuento = descuento.toFixed(2);
+    totales.iva = iva.toFixed(2);
+    totales.total = total.toFixed(2);
+  },
+  { deep: true }
+);
+
+// ---- Save ----
+async function guardar() {
+  if (!items.value.length) {
+    $q.notify({ type: 'warning', message: 'Agregue al menos un item antes de guardar.' });
+    return;
+  }
+
+  const empresaId = authStore.user?.empresaId ?? 0;
+
+  const payload = {
+    enc: {
+      ident: factura.cliente ?? '',
+      sucursal: empresaId,
+      nombre: factura.cliente ?? '',
+      total: parseFloat(totales.total),
+      subtotal: parseFloat(totales.subtotal),
+      iva: parseFloat(totales.iva),
+    },
+    det: {
+      rows: items.value.map((it) => ({
+        item: it.item ?? '',
+        talla: it.talla,
+        color: it.color ?? '',
+        cantidad: it.cantidad,
+        pventa: it.precio,
+        pvfinal: it.pvFinal,
+        pvfinaliva: it.pvFinal + it.pvIva,
+        por_iva: it.iva,
+        subtotal: it.subtotal,
+      })),
+    },
+    detotrospagos: [],
+  };
+
+  try {
+    const { data } = await salidasApi.registrarFactura(payload);
+    $q.notify({ type: 'positive', message: `Factura guardada: #${data.rpta}` });
+  } catch {
+    $q.notify({ type: 'negative', message: 'Error al guardar' });
+  }
+}
+
+async function guardarOtros() {
+  $q.notify({ type: 'info', message: 'Función "Guardar otros" aún no implementada.' });
+}
+</script>
+
+<style scoped>
+.border-top {
+  border-top: 1px solid #e0e0e0;
+}
+</style>
