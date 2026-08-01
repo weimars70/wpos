@@ -17,5 +17,5 @@ import {Notify,Dialog,Loading} from 'quasar'
 
 
 
-export default { config: {"notify":{"position":"top-right"}},plugins: {Notify,Dialog,Loading} }
+export default { config: {"notify":{"position":"center","classes":"text-center"}},plugins: {Notify,Dialog,Loading} }
 

@@ -1,6 +1,7 @@
 import {
   Entity,
   PrimaryColumn,
+  PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
   UpdateDateColumn,
@@ -8,7 +9,7 @@ import {
 
 @Entity({ name: 'usuarios', schema: 'public', synchronize: false })
 export class User {
-  @PrimaryColumn({ type: 'int' })
+  @PrimaryGeneratedColumn()
   id: number;
 
   @PrimaryColumn({ name: 'empresa_id', type: 'int' })

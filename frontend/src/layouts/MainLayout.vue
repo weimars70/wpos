@@ -36,7 +36,7 @@
       class="bg-white"
     >
       <div class="q-pa-md text-center q-mt-md">
-        <div class="text-h6 text-weight-bold text-primary">SISTEMA HUELLAS</div>
+        <div class="text-h6 text-weight-bold text-primary">SISTEMA WPOS</div>
         <div class="text-caption text-grey-6">v1.2.0</div>
       </div>
 

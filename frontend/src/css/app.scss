@@ -39,3 +39,65 @@ body {
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
+
+/* Estilos de centrado global para notificaciones y mensajes de la aplicación */
+.q-notifications__list {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.q-notifications__list--center {
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: auto !important;
+  max-width: 90vw !important;
+}
+
+.q-notification {
+  text-align: center !important;
+  justify-content: center !important;
+  align-items: center !important;
+  margin: 0 auto !important;
+  border-radius: 14px !important;
+  padding: 14px 28px !important;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35) !important;
+  font-size: 0.95rem !important;
+
+  .q-notification__content {
+    text-align: center !important;
+    justify-content: center !important;
+    align-items: center !important;
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 10px !important;
+  }
+
+  .q-notification__message {
+    text-align: center !important;
+    font-weight: 500 !important;
+  }
+
+  .q-notification__caption {
+    text-align: center !important;
+  }
+}
+
+/* Centrado para Banners de error e información */
+.q-banner {
+  text-align: center !important;
+  justify-content: center !important;
+  align-items: center !important;
+
+  .q-banner__avatar, .q-banner__actions {
+    align-self: center !important;
+  }
+
+  .q-banner__content {
+    text-align: center !important;
+    justify-content: center !important;
+  }
+}

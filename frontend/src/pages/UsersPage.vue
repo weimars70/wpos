@@ -3,7 +3,7 @@
     <div class="row items-center q-mb-lg">
       <div class="col">
         <div class="text-h4 text-weight-bold">Usuarios</div>
-        <div class="text-subtitle2 text-grey-6">Gestión de usuarios del sistema</div>
+        <div class="text-subtitle2 text-grey-6">Gestión de usuarios y permisos por sucursales del grupo empresarial</div>
       </div>
       <div class="col-auto">
         <q-btn color="primary" icon="add" label="Nuevo usuario" unelevated @click="openDialog(null)" />
@@ -19,10 +19,17 @@
         flat
         :pagination="{ rowsPerPage: 10 }"
       >
+        <template #body-cell-empresaNombre="props">
+          <q-td :props="props">
+            <q-chip dense color="blue-1" text-color="primary" icon="storefront" size="sm">
+              {{ props.value }}
+            </q-chip>
+          </q-td>
+        </template>
         <template #body-cell-actions="props">
           <q-td :props="props" class="q-gutter-xs">
             <q-btn flat round dense icon="edit" color="primary" size="sm" @click="openDialog(props.row)">
-              <q-tooltip>Editar</q-tooltip>
+              <q-tooltip>Editar y gestionar permisos</q-tooltip>
             </q-btn>
             <q-btn flat round dense icon="delete" color="negative" size="sm" @click="confirmDelete(props.row)">
               <q-tooltip>Eliminar</q-tooltip>
@@ -58,8 +65,18 @@ const columns = [
   { name: 'name', label: 'Nombre', field: 'name', align: 'left' as const, sortable: true },
   { name: 'email', label: 'Email', field: 'email', align: 'left' as const, sortable: true },
   {
-    name: 'createdAt', label: 'Creado', field: 'createdAt', align: 'left' as const,
-    format: (v: string) => new Date(v).toLocaleDateString('es-ES'),
+    name: 'empresaNombre',
+    label: 'Sucursal / Tienda',
+    field: (row: User) => row.empresaNombre || 'Sede Principal',
+    align: 'left' as const,
+    sortable: true,
+  },
+  {
+    name: 'createdAt',
+    label: 'Creado',
+    field: 'createdAt',
+    align: 'left' as const,
+    format: (v: string) => (v ? new Date(v).toLocaleDateString('es-ES') : '-'),
   },
   { name: 'actions', label: 'Acciones', field: 'actions', align: 'center' as const },
 ];

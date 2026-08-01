@@ -2,7 +2,7 @@ const { configure } = require('quasar/wrappers');
 
 module.exports = configure(function (ctx) {
   return {
-    boot: ['axios'],
+    boot: ['axios', 'notify'],
     css: ['app.scss'],
     extras: ['material-icons'],
     build: {
@@ -14,7 +14,7 @@ module.exports = configure(function (ctx) {
     },
     framework: {
       config: {
-        notify: { position: 'top-right' },
+        notify: { position: 'center', classes: 'text-center' },
       },
       plugins: ['Notify', 'Dialog', 'Loading'],
     },

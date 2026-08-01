@@ -5,18 +5,22 @@ Permitir que los usuarios seleccionen una empresa (sucursal) específica al inic
 
 ## Registro de Operaciones
 
-### 1. Flujo de Autenticación con Selección de Empresa
-- **Paso 1: Identificación del Usuario.** El frontend solicita el nombre de usuario.
-- **Paso 2: Obtención de Empresas.** El backend debe proveer un endpoint para listar las empresas asociadas a ese nombre de usuario (sin requerir contraseña aún).
-- **Paso 3: Selección y Login.** El usuario selecciona la empresa, ingresa su contraseña y el login se procesa con `(usuario, password, empresa_id)`.
+### 1. Flujo de Autenticación en 2 Pasos
+- **Paso 1: Validación de Credenciales (Usuario + Contraseña).** El frontend solicita el nombre de usuario y la contraseña. Al enviar, el backend valida las credenciales (`POST /auth/validate`).
+- **Paso 2: Obtención de Empresas Válidas.** El backend comprueba la contraseña mediante bcrypt y retorna únicamente las empresas a las que pertenece el usuario y para las cuales las credenciales son correctas.
+- **Paso 3: Selección y Auto-Login.**
+  - Si el usuario tiene **1 sola empresa**, el sistema realiza auto-login directo.
+  - Si el usuario posee **múltiples empresas**, el sistema pasa al Paso 2 permitiéndole elegir la empresa a la que desea ingresar.
 - **Paso 4: Token JWT.** El token generado DEBE incluir el `empresa_id`.
 
-### 2. Persistencia en Sesión
-- El `empresa_id` debe almacenarse en el store de autenticación del frontend (Pinia).
-- Debe incluirse en los headers de las peticiones API o extraerse del JWT en el backend.
+### 2. Persistencia en Sesión y Grupo Empresarial
+- El `empresa_id` y el `grupo_empresarial` deben almacenarse en el store de autenticación del frontend (Pinia).
+- El JWT debe incluir tanto el `empresaId` activo como el `grupoEmpresarial` extraído de la sucursal seleccionada.
+- Debe incluirse en los headers de las peticiones API o extraerse del JWT en el backend en `req.user`.
 
-### 3. Integración en Operaciones de DB
-- Toda consulta SQL o guardado debe filtrar por `empresa_id` o `sucursal` según corresponda la tabla.
+### 3. Permisos Multi-Empresa por Grupo Empresarial
+- En la creación de usuarios, el administrador puede listar todas las sucursales/tiendas del `grupo_empresarial` (`GET /users/empresas-grupo`) y asignar permisos de acceso seleccionando múltiples sucursales.
+- Toda consulta SQL o guardado debe filtrar por `empresa_id` o `grupo_empresarial` según corresponda el alcance del módulo.
 - **Caso Salidas:** El endpoint de facturación debe usar el `empresa_id` del token JWT en lugar de un parámetro manual si es posible, para mayor seguridad.
 
 ## Restricciones y Casos Borde

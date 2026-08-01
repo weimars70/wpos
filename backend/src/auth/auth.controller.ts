@@ -11,6 +11,7 @@ import {
 import { AuthService } from './auth.service';
 import { UsersService } from '../users/users.service';
 import { LoginDto } from './dto/login.dto';
+import { ValidateUserDto } from './dto/validate-user.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -18,6 +19,15 @@ export class AuthController {
     private authService: AuthService,
     private usersService: UsersService,
   ) {}
+
+  @Post('validate')
+  @HttpCode(HttpStatus.OK)
+  async validateCredentials(@Body() dto: ValidateUserDto) {
+    return this.authService.validateCredentialsAndGetEmpresas(
+      dto.usuario,
+      dto.password,
+    );
+  }
 
   @Post('login')
   @HttpCode(HttpStatus.OK)

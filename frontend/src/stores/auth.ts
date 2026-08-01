@@ -65,6 +65,20 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  async function validateCredentials(usuario: string, password: string) {
+    console.log(`[AuthStore] Validando credenciales para ${usuario}...`);
+    try {
+      const { data } = await axios.post<{ id: number; nombre: string }[]>(
+        `${API_URL}/auth/validate`,
+        { usuario, password },
+      );
+      return data;
+    } catch (error) {
+      console.error('[AuthStore] Error en validateCredentials:', error);
+      throw error;
+    }
+  }
+
   function logout() {
     token.value = null;
     user.value = null;
@@ -72,5 +86,5 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.removeItem('user');
   }
 
-  return { token, user, isLoggedIn, login, getEmpresas, logout };
+  return { token, user, isLoggedIn, login, getEmpresas, validateCredentials, logout };
 });

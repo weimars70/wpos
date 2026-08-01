@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from '../users/users.service';
@@ -10,6 +10,17 @@ export class AuthService {
     private usersService: UsersService,
     private jwtService: JwtService,
   ) {}
+
+  async validateCredentialsAndGetEmpresas(usuario: string, password: string) {
+    const empresas = await this.usersService.findValidEmpresasByUsuarioAndPassword(
+      usuario,
+      password,
+    );
+    if (!empresas || empresas.length === 0) {
+      throw new UnauthorizedException('Usuario o contraseña incorrectos');
+    }
+    return empresas;
+  }
 
   async validateUser(
     usuario: string,
@@ -43,11 +54,15 @@ export class AuthService {
       (user as User).id,
       (user as User).empresaId,
     );
+    const grupoEmpresarial = await this.usersService.getGrupoEmpresarialByEmpresaId(
+      (user as User).empresaId,
+    );
     const payload = {
       sub: (user as User).id,
       empresaId: (user as User).empresaId,
       roleId: (user as User).roleId,
       name: user.name,
+      grupoEmpresarial: grupoEmpresarial ?? 1,
     };
     return {
       access_token: this.jwtService.sign(payload),

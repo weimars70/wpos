@@ -42,8 +42,6 @@ import quasarUserOptions from './quasar-user-options.js'
 
 
 
-console.info('[Quasar] Running SPA.')
-
 
 const publicPath = `/`
 
@@ -150,7 +148,9 @@ createQuasarApp(createApp, quasarUserOptions)
 
     return Promise[ method ]([
       
-      import('boot/axios')
+      import('boot/axios'),
+      
+      import('boot/notify')
       
     ]).then(bootFiles => {
       const boot = mapFn(bootFiles).filter(entry => typeof entry === 'function')
