@@ -29,14 +29,53 @@
       :loading="loading"
       no-data-label="No hay datos disponibles"
     >
+      <template v-slot:body-cell-imagen="props">
+        <q-td :props="props" align="center">
+          <div
+            v-if="props.row.imagen && normalizeImagePath(props.row.imagen)"
+            class="cursor-pointer inline-block"
+            @click="ampliarImagen(props.row.imagen)"
+          >
+            <q-avatar square size="42px" class="rounded-borders overflow-hidden bg-grey-3 shadow-1">
+              <q-img :src="normalizeImagePath(props.row.imagen)" fit="cover" />
+            </q-avatar>
+            <q-tooltip>Clic para ampliar imagen</q-tooltip>
+          </div>
+          <q-icon v-else name="image" color="grey-5" size="24px">
+            <q-tooltip>Sin imagen</q-tooltip>
+          </q-icon>
+        </q-td>
+      </template>
       <template v-slot:body-cell-actions="props">
-        <q-td :props="props" class="q-gutter-sm">
-          <q-btn flat round color="blue" icon="edit" size="sm" @click="editRow(props.row)">
-            <q-tooltip>Editar</q-tooltip>
-          </q-btn>
-          <q-btn flat round color="red" icon="delete" size="sm" @click="deleteRow(props.row)">
-            <q-tooltip>Eliminar</q-tooltip>
-          </q-btn>
+        <q-td :props="props" align="center">
+          <div class="row items-center justify-center no-wrap q-gutter-xs">
+            <q-btn
+              unelevated
+              round
+              dense
+              size="sm"
+              color="indigo-1"
+              text-color="indigo-9"
+              icon="edit_note"
+              @click="editRow(props.row)"
+              class="action-btn shadow-1"
+            >
+              <q-tooltip class="bg-indigo-9 text-caption">Editar Item</q-tooltip>
+            </q-btn>
+            <q-btn
+              unelevated
+              round
+              dense
+              size="sm"
+              color="pink-1"
+              text-color="pink-8"
+              icon="delete_forever"
+              @click="deleteRow(props.row)"
+              class="action-btn shadow-1"
+            >
+              <q-tooltip class="bg-pink-9 text-caption">Eliminar Item</q-tooltip>
+            </q-btn>
+          </div>
         </q-td>
       </template>
     </q-table>
@@ -160,8 +199,17 @@
                 </q-file>
               </div>
               <div class="col-12 col-md-6">
-                <div v-if="formData.imagen" class="row items-center q-gutter-sm">
-                  <q-img :src="imagenUrl" style="width: 90px; height: 90px; border-radius: 8px;" fit="cover" />
+                <div v-if="formData.imagen || localPreviewUrl" class="row items-center q-gutter-sm">
+                  <div class="cursor-pointer" @click="ampliarImagen(localPreviewUrl || formData.imagen)">
+                    <q-img :src="imagenUrl" style="width: 90px; height: 90px; border-radius: 8px;" fit="cover">
+                      <template v-slot:error>
+                        <div class="absolute-full flex flex-center bg-grey-3 text-grey-7" style="font-size: 10px; text-align: center;">
+                          Imagen no encontrada
+                        </div>
+                      </template>
+                    </q-img>
+                    <q-tooltip>Clic para ampliar imagen</q-tooltip>
+                  </div>
                   <q-btn flat dense round icon="close" color="red" @click="quitarImagen">
                     <q-tooltip>Quitar imagen</q-tooltip>
                   </q-btn>
@@ -175,6 +223,27 @@
               <q-btn label="Guardar" type="submit" color="primary" unelevated class="rounded-borders q-px-md" :loading="saving"/>
             </div>
           </q-form>
+        </q-card-section>
+      </q-card>
+    </q-dialog>
+
+    <!-- Modal Zoom de Imagen -->
+    <q-dialog v-model="showZoomDialog">
+      <q-card style="max-width: 90vw; max-height: 90vh; border-radius: 12px; overflow: hidden;">
+        <q-card-section class="row items-center q-pb-none bg-primary text-white">
+          <div class="text-subtitle1 text-weight-bold">Vista previa de imagen</div>
+          <q-space />
+          <q-btn icon="close" flat round dense v-close-popup />
+        </q-card-section>
+        <q-card-section class="q-pa-md flex flex-center bg-grey-1" style="min-width: 280px; min-height: 280px;">
+          <q-img
+            :src="zoomImageUrl"
+            style="max-width: 80vw; max-height: 75vh; border-radius: 8px; object-fit: contain;"
+          >
+            <template v-slot:error>
+              <div class="text-subtitle2 text-grey-7 q-pa-md">No se pudo cargar la imagen</div>
+            </template>
+          </q-img>
         </q-card-section>
       </q-card>
     </q-dialog>
@@ -218,14 +287,56 @@ const formData = reactive({
 const coloresSeleccionados = ref<number[]>([]);
 const tallasSeleccionadas = ref<string[]>([]);
 
+const localPreviewUrl = ref<string>('');
+const showZoomDialog = ref(false);
+const zoomImageUrl = ref<string>('');
+
+function extractStringFromImage(img: any): string {
+  if (!img) return '';
+  if (typeof img === 'string') return img;
+  if (typeof img === 'object') {
+    if (Array.isArray(img.data)) {
+      return img.data.map((c: number) => String.fromCharCode(c)).join('');
+    }
+    if (Array.isArray(img)) {
+      return img.map((c: number) => String.fromCharCode(c)).join('');
+    }
+  }
+  return String(img);
+}
+
+function normalizeImagePath(img: any): string {
+  if (!img) return '';
+  const str = extractStringFromImage(img);
+  const clean = str.trim();
+  if (!clean || clean === 'null' || clean === 'undefined' || clean === '[object Object]') return '';
+  if (clean.startsWith('http://') || clean.startsWith('https://') || clean.startsWith('data:') || clean.startsWith('blob:')) {
+    return clean;
+  }
+  const filename = clean.split(/[/\\]/).pop() || '';
+  if (!filename || filename === 'null' || filename === 'undefined' || filename === '[object Object]') return '';
+
+  const baseUrl = (api.defaults.baseURL || 'http://localhost:3000').replace(/\/+$/, '');
+  return `${baseUrl}/uploads/items/${filename}`;
+}
+
+function ampliarImagen(img: any) {
+  const url = normalizeImagePath(img);
+  if (url) {
+    zoomImageUrl.value = url;
+    showZoomDialog.value = true;
+  }
+}
+
 const imagenUrl = computed(() => {
-  if (!formData.imagen) return '';
-  if (formData.imagen.startsWith('http')) return formData.imagen;
-  return `${api.defaults.baseURL}${formData.imagen}`;
+  if (localPreviewUrl.value) return localPreviewUrl.value;
+  return normalizeImagePath(formData.imagen);
 });
 
 // Definición de tabla (lee de view_items)
 const columns = [
+  { name: 'actions', label: 'Acciones', field: 'actions', align: 'center' },
+  { name: 'imagen', label: 'Imagen', field: 'imagen', align: 'center' },
   { name: 'item', label: 'Item (Código)', field: 'item', align: 'left', sortable: true },
   { name: 'descripcion', label: 'Descripción', field: 'descripcion', align: 'left', sortable: true },
   { name: 'grupo', label: 'Grupo', field: 'grupo', align: 'left', sortable: true },
@@ -234,12 +345,7 @@ const columns = [
   { name: 'por_ganmin', label: '% Gan. Min', field: 'por_ganmin', align: 'left', sortable: true },
   { name: 'por_ganmax', label: '% Gan. Max', field: 'por_ganmax', align: 'left', sortable: true },
   { name: 'activo', label: 'Activo', field: 'activo', align: 'left', sortable: true },
-  { name: 'ult_pcompra', label: 'Ult. Prm. Compra', field: 'ult_pcompra', align: 'left', sortable: true },
-  { name: 'ult_pventa', label: 'Ult. Prm. Venta', field: 'ult_pventa', align: 'left', sortable: true },
-  { name: 'precio2', label: 'Precio Venta 2', field: 'precio2', align: 'left', sortable: true },
-  { name: 'precio3', label: 'Precio Venta 3', field: 'precio3', align: 'left', sortable: true },
-  { name: 'promocion', label: 'Promoción', field: 'promocion', align: 'left', sortable: true },
-  { name: 'actions', label: 'Acciones', field: 'actions', align: 'center' }
+  { name: 'promocion', label: 'Promoción', field: 'promocion', align: 'left', sortable: true }
 ] as any[];
 
 const rows = ref<any[]>([]);
@@ -302,6 +408,10 @@ function resetForm() {
   coloresSeleccionados.value = [];
   tallasSeleccionadas.value = [];
   imagenFile.value = null;
+  if (localPreviewUrl.value) {
+    URL.revokeObjectURL(localPreviewUrl.value);
+    localPreviewUrl.value = '';
+  }
 }
 
 function openNew() {
@@ -327,7 +437,8 @@ async function editRow(row: any) {
     formData.por_ganmax = item.por_ganmax;
     formData.activo = item.activo;
     formData.item_tipo_iva = item.item_tipo_iva;
-    formData.imagen = item.imagen;
+    const imgVal = item.imagen ?? row.imagen;
+    formData.imagen = imgVal ? extractStringFromImage(imgVal) : '';
     formData.ult_pcompra = item.ult_pcompra;
     formData.ult_pventa = item.ult_pventa;
     formData.precio_venta2 = item.precio_venta2;
@@ -360,7 +471,17 @@ function deleteRow(row: any) {
 }
 
 async function onImagenSeleccionada(file: File | null) {
-  if (!file) return;
+  if (!file) {
+    if (localPreviewUrl.value) {
+      URL.revokeObjectURL(localPreviewUrl.value);
+      localPreviewUrl.value = '';
+    }
+    return;
+  }
+  if (localPreviewUrl.value) {
+    URL.revokeObjectURL(localPreviewUrl.value);
+  }
+  localPreviewUrl.value = URL.createObjectURL(file);
   uploadingImagen.value = true;
   try {
     const form = new FormData();
@@ -382,6 +503,10 @@ async function onImagenSeleccionada(file: File | null) {
 function quitarImagen() {
   formData.imagen = '';
   imagenFile.value = null;
+  if (localPreviewUrl.value) {
+    URL.revokeObjectURL(localPreviewUrl.value);
+    localPreviewUrl.value = '';
+  }
 }
 
 async function saveData() {
@@ -427,5 +552,12 @@ async function saveData() {
 <style scoped>
 .rounded-borders {
   border-radius: 8px;
+}
+.action-btn {
+  transition: transform 0.18s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.action-btn:hover {
+  transform: translateY(-2px) scale(1.12);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15) !important;
 }
 </style>

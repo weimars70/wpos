@@ -18,11 +18,23 @@ export class ItemService {
     private dataSource: DataSource,
   ) {}
 
-  findAll(estado?: string) {
+  private parseImagen(imagen: any): string | null {
+    if (!imagen) return null;
+    if (typeof imagen === 'string') return imagen;
+    if (Buffer.isBuffer(imagen)) {
+      return imagen.toString('utf8');
+    }
+    if (typeof imagen === 'object' && Array.isArray(imagen.data)) {
+      return Buffer.from(imagen.data).toString('utf8');
+    }
+    return String(imagen);
+  }
+
+  async findAll(estado?: string) {
     let where = '';
     if (estado === 'activos') where = 'WHERE activo = true';
     else if (estado === 'inactivos') where = 'WHERE activo = false';
-    return this.dataSource.query(
+    const rows = await this.dataSource.query(
       `SELECT item, descripcion, grupo_codigo, grupo, por_iva, por_ganmin, por_ganmax,
               activo, item_tipo_iva, tipo_iva, imagen, ult_pcompra, ult_pventa,
               precio2, precio3, promocion
@@ -30,10 +42,18 @@ export class ItemService {
        ${where}
        ORDER BY item`,
     );
+    return rows.map((r: any) => ({
+      ...r,
+      imagen: this.parseImagen(r.imagen),
+    }));
   }
 
-  findOne(id: any) {
-    return this.repo.findOneBy({ item: id } as any);
+  async findOne(id: any) {
+    const item = await this.repo.findOneBy({ item: id } as any);
+    if (item && item.imagen) {
+      item.imagen = this.parseImagen(item.imagen) as any;
+    }
+    return item;
   }
 
   create(data: any) {
