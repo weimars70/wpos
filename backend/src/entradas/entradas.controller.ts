@@ -18,6 +18,9 @@ export class EntradasController {
     @Query('scope') scope?: string,
     @Query('cursor') cursor?: string,
     @Query('limit') limit?: string,
+    @Query('proveedor') proveedor?: string,
+    @Query('fecha_inicio') fechaInicio?: string,
+    @Query('fecha_fin') fechaFin?: string,
   ) {
     return this.entradasService.getCompras(
       Number(empresaId),
@@ -25,6 +28,9 @@ export class EntradasController {
       scope || 'tienda',
       cursor ? Number(cursor) : undefined,
       limit ? Number(limit) : 30,
+      proveedor,
+      fechaInicio,
+      fechaFin,
     );
   }
 

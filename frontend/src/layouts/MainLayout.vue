@@ -144,7 +144,7 @@
         <q-expansion-item
           icon="folder_special"
           label="Maestros"
-          class="q-mx-sm rounded-borders text-white q-expansion-item-height"
+          class="q-mx-sm rounded-borders text-white"
           header-class="text-weight-medium text-white"
         >
           <q-item clickable v-ripple to="/maestros/medios-pago" active-class="bg-blue-1 text-primary" class="rounded-borders q-ml-md q-mr-sm q-mb-xs">
@@ -254,8 +254,5 @@ hr{
   border: 1px #2a5298 solid;  
 }
 
-.q-expansion-item-height{
-  height: 70vh;
-}
 
 </style>

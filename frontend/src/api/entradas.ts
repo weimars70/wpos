@@ -44,9 +44,27 @@ export const entradasApi = {
   registrarCompra: (payload: CreateCompraPayload) =>
     api.post<{ rpta: string | number }>('/entradas/registrar-compra', payload),
 
-  getCompras: (empresaId: number, cxp: boolean, scope: string = 'tienda', cursor?: number, limit: number = 30) =>
+  getCompras: (
+    empresaId: number,
+    cxp: boolean,
+    scope: string = 'tienda',
+    cursor?: number,
+    limit: number = 30,
+    proveedor?: string,
+    fechaInicio?: string,
+    fechaFin?: string,
+  ) =>
     api.get<{ items: any[]; nextCursor: number | null; hasMore: boolean }>('/entradas/compras', {
-      params: { empresa_id: empresaId, cxp: cxp.toString(), scope, cursor, limit },
+      params: {
+        empresa_id: empresaId,
+        cxp: cxp.toString(),
+        scope,
+        cursor,
+        limit,
+        proveedor: proveedor || undefined,
+        fecha_inicio: fechaInicio || undefined,
+        fecha_fin: fechaFin || undefined,
+      },
     }),
 
   getMovimientos: (empresaId: number) =>

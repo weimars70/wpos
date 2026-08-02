@@ -10,7 +10,7 @@
       :rows="rows"
       :columns="columns"
       row-key="codigo"
-      class="rounded-borders shadow-1 header-tablet border-table border-row scroll-tablet width-tablet"
+      class="col header-tablet border-table border-row width-tablet full-height-table"
       :loading="loading"
       no-data-label="No hay datos disponibles"
       :pagination="{ rowsPerPage: 0 }"
@@ -176,19 +176,24 @@ async function saveData() {
   width: 50vw;
 }
 
-.scroll-tablet :deep(.q-table__middle) {
+.full-height-table {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: 100%;
+  overflow: hidden;
+}
+
+.full-height-table :deep(.q-table__container) {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: 100%;
+}
+
+.full-height-table :deep(.q-table__middle) {
+  flex: 1 1 auto;
+  max-height: calc(100vh - 235px);
   overflow-y: auto;
-}
-
-@media (max-width: 1365px) {
-  .scroll-tablet :deep(.q-table__middle) {
-    max-height: 42vh;
-  }
-}
-
-@media (min-width: 1366px) and (max-width: 1920px) {
-  .scroll-tablet :deep(.q-table__middle) {    
-    max-height: 55vh;    
-  }
 }
 </style>

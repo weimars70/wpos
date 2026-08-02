@@ -1,9 +1,16 @@
 <template>
-  <q-page padding class="bg-grey-2">
-    <div class="row items-center justify-between q-mb-md">
-      <div>
-        <div class="text-h5 text-negative text-weight-bold">Cuentas por Pagar (CXP)</div>
-        <div class="text-caption text-grey-7">Listado de compras con saldo pendiente (Scroll Infinito por Cursor)</div>
+  <q-page class="q-pa-md column no-wrap overflow-hidden bg-grey-2" style="min-height: unset !important; height: calc(100vh - 95px); max-height: calc(100vh - 95px);">
+    <div class="col-auto row items-center justify-between q-mb-md">
+      <div class="row items-center q-gutter-sm">
+        <div>
+          <div class="row items-center q-gutter-sm">
+            <div class="text-h5 text-negative text-weight-bold">Cuentas por Pagar (CXP)</div>
+            <q-chip color="negative" text-color="white" dense class="text-weight-bold q-px-sm" icon="request_quote">
+              {{ rows.length }} Facturas
+            </q-chip>
+          </div>
+          <div class="text-caption text-grey-7">Listado de compras con saldo pendiente (Scroll Infinito por Cursor)</div>
+        </div>
       </div>
       <q-btn
         flat
@@ -17,13 +24,65 @@
       </q-btn>
     </div>
 
+    <!-- Card de Filtros Avanzados -->
+    <q-card flat class="col-auto rounded-borders q-mb-md bg-white shadow-1">
+      <q-card-section class="q-py-sm">
+        <div class="row items-center q-col-gutter-md">
+          <div class="col-12 col-sm-4 col-md-3">
+            <q-input
+              v-model="proveedorFilter"
+              dense
+              outlined
+              clearable
+              placeholder="Proveedor o NIT"
+              label="Buscar por Proveedor"
+              debounce="400"
+              @update:model-value="resetAndFetch"
+            >
+              <template v-slot:prepend>
+                <q-icon name="person_search" />
+              </template>
+            </q-input>
+          </div>
+          <div class="col-12 col-sm-3 col-md-2">
+            <q-input
+              v-model="fechaInicio"
+              type="date"
+              dense
+              outlined
+              label="Fecha Desde"
+              stack-label
+              @change="resetAndFetch"
+            />
+          </div>
+          <div class="col-12 col-sm-3 col-md-2">
+            <q-input
+              v-model="fechaFin"
+              type="date"
+              dense
+              outlined
+              label="Fecha Hasta"
+              stack-label
+              @change="resetAndFetch"
+            />
+          </div>
+          <div class="col-12 col-sm-2 col-md-3 row items-center q-gutter-xs">
+            <q-btn color="negative" icon="search" label="Buscar" dense unelevated @click="resetAndFetch" />
+            <q-btn flat round color="grey-7" icon="clear" dense @click="clearFilters">
+              <q-tooltip>Limpiar Filtros</q-tooltip>
+            </q-btn>
+          </div>
+        </div>
+      </q-card-section>
+    </q-card>
+
     <!-- Scroll Infinito + Tabla CXP -->
-    <q-infinite-scroll @load="onLoad" :offset="250" :disable="!hasMore || loading">
+    <q-infinite-scroll @load="onLoad" :offset="250" :disable="!hasMore || loading" class="col column no-wrap overflow-hidden">
       <q-table
         :rows="rows"
         :columns="columns"
         row-key="codigo"
-        class="rounded-borders shadow-1 bg-white"
+        class="col rounded-borders header-tablet border-table border-row full-height-table"
         :loading="loading"
         :filter="filter"
         no-data-label="No hay facturas con saldo pendiente (CXP)"
@@ -55,8 +114,8 @@
             dense
             debounce="300"
             v-model="filter"
-            placeholder="Buscar proveedor o ID..."
-            style="min-width: 300px"
+            placeholder="Filtrar en tabla..."
+            style="min-width: 200px"
           >
             <template v-slot:append>
               <q-icon name="search" />
@@ -87,6 +146,15 @@
           <q-td :props="props">
             <div class="text-weight-medium">{{ props.row.nombre }}</div>
             <div class="text-caption text-grey-6">{{ props.row.ident }}</div>
+          </q-td>
+        </template>
+
+        <!-- Slot para Cant. Unidades -->
+        <template v-slot:body-cell-total_unidades="props">
+          <q-td :props="props" class="text-right text-weight-medium">
+            <q-chip dense color="grey-2" text-color="grey-9">
+              {{ props.row.total_unidades || 0 }}
+            </q-chip>
           </q-td>
         </template>
 
@@ -140,6 +208,10 @@ const rows = ref<any[]>([]);
 const filter = ref('');
 const scope = ref<'tienda' | 'grupo'>('tienda');
 
+const proveedorFilter = ref('');
+const fechaInicio = ref('');
+const fechaFin = ref('');
+
 const nextCursor = ref<number | null>(null);
 const hasMore = ref(true);
 
@@ -148,6 +220,7 @@ const columns = [
   { name: 'fecha', label: 'Fecha', field: 'fecha', align: 'left', sortable: true, format: (val: string) => date.formatDate(val, 'DD/MM/YYYY') },
   { name: 'sucursal', label: 'Tienda / Sucursal', field: 'n_sucursal', align: 'left', sortable: true },
   { name: 'proveedor', label: 'Proveedor', field: 'nombre', align: 'left', sortable: true },
+  { name: 'total_unidades', label: 'Cant. Unidades', field: 'total_unidades', align: 'right', sortable: true },
   { name: 'total', label: 'Total Factura', field: 'total', align: 'right', sortable: true },
   { name: 'saldo', label: 'SALDO PENDIENTE', field: 'saldo', align: 'right', sortable: true },
 ] as any[];
@@ -155,6 +228,14 @@ const columns = [
 onMounted(() => {
   resetAndFetch();
 });
+
+function clearFilters() {
+  proveedorFilter.value = '';
+  fechaInicio.value = '';
+  fechaFin.value = '';
+  filter.value = '';
+  resetAndFetch();
+}
 
 async function resetAndFetch() {
   rows.value = [];
@@ -183,6 +264,9 @@ async function loadNextBatch(done?: (stop?: boolean) => void) {
       scope.value,
       nextCursor.value ?? undefined,
       30,
+      proveedorFilter.value || undefined,
+      fechaInicio.value || undefined,
+      fechaFin.value || undefined,
     );
 
     if (data && data.items && data.items.length > 0) {
@@ -221,5 +305,35 @@ function formatCurrency(val: number) {
 <style scoped>
 .rounded-borders {
   border-radius: 12px;
+}
+
+.header-tablet :deep(thead th) {
+  background-color: #adc2ad;
+  color: black;
+  font-weight: bold;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.full-height-table {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: 100%;
+  overflow: hidden;
+}
+
+.full-height-table :deep(.q-table__container) {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: 100%;
+}
+
+.full-height-table :deep(.q-table__middle) {
+  flex: 1 1 auto;
+  max-height: 100%;
+  overflow-y: auto;
 }
 </style>

@@ -40,6 +40,9 @@ export class EntradasService {
     scope: string = 'tienda',
     cursor?: number,
     limit: number = 30,
+    proveedor?: string,
+    fechaInicio?: string,
+    fechaFin?: string,
   ) {
     let whereClause = `WHERE empresa_id = $1`;
     if (scope === 'grupo') {
@@ -55,6 +58,21 @@ export class EntradasService {
       whereClause += ` AND saldo > 0`;
     }
 
+    if (proveedor && proveedor.trim() !== '') {
+      params.push(`%${proveedor.trim()}%`);
+      whereClause += ` AND (UPPER(proveedor_nombre) LIKE UPPER($${params.length}) OR UPPER(proveedor_ident) LIKE UPPER($${params.length}))`;
+    }
+
+    if (fechaInicio && fechaInicio.trim() !== '') {
+      params.push(`${fechaInicio.trim()} 00:00:00`);
+      whereClause += ` AND fechahora >= $${params.length}::timestamp`;
+    }
+
+    if (fechaFin && fechaFin.trim() !== '') {
+      params.push(`${fechaFin.trim()} 23:59:59`);
+      whereClause += ` AND fechahora <= $${params.length}::timestamp`;
+    }
+
     if (cursor) {
       params.push(cursor);
       whereClause += ` AND codigo < $${params.length}`;
@@ -65,7 +83,7 @@ export class EntradasService {
 
     const query = `
       SELECT codigo, fechahora AS fecha, proveedor_ident AS ident, proveedor_nombre AS nombre, 
-             subtotal, iva, total, saldo, empresa_id, n_sucursal 
+             subtotal, iva, total, saldo, empresa_id, n_sucursal, total_unidades 
       FROM public.view_compras 
       ${whereClause} 
       ORDER BY codigo DESC 
