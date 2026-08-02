@@ -6,12 +6,12 @@
       <div class="row items-center q-gutter-sm">
         <div>
           <div class="row items-center q-gutter-sm">
-            <div class="text-h5 text-primary text-weight-bold">Inventario General</div>
-            <q-chip color="primary" text-color="white" dense class="text-weight-bold q-px-sm" icon="domain">
-              {{ pagination.rowsNumber }} Registros Totales
+            <div class="text-h5 text-negative text-weight-bold">Items Sin Inventario</div>
+            <q-chip color="negative" text-color="white" dense class="text-weight-bold q-px-sm" icon="warning">
+              {{ pagination.rowsNumber }} Registros
             </q-chip>
           </div>
-          <div class="text-caption text-grey-7">Consolidado general de inventario de todas las sedes (public.view_inventario)</div>
+          <div class="text-caption text-grey-7">Listado de ítems sin existencias o con saldo negativo (public.view_items_sin_inventario)</div>
         </div>
       </div>
 
@@ -26,12 +26,12 @@
           @click="exportCSV"
           :disable="loading || rows.length === 0"
         >
-          <q-tooltip>Descargar reporte de Inventario General en CSV</q-tooltip>
+          <q-tooltip>Descargar listado en CSV</q-tooltip>
         </q-btn>
         <q-btn
           flat
           round
-          color="primary"
+          color="negative"
           icon="refresh"
           @click="fetchData"
           :loading="loading"
@@ -41,32 +41,18 @@
       </div>
     </div>
 
-    <!-- Cards de Métricas / Resumen General -->
+    <!-- Cards de Métricas / Resumen -->
     <div class="col-auto row q-col-gutter-md q-mb-md">
       <div class="col-12 col-sm-6 col-md-3">
-        <q-card flat class="rounded-borders bg-white shadow-1 border-left-primary">
+        <q-card flat class="rounded-borders bg-white shadow-1 border-left-negative">
           <q-card-section class="q-pa-sm row items-center justify-between">
             <div>
-              <div class="text-caption text-grey-6 text-weight-medium">TOTAL REGISTROS</div>
-              <div class="text-h6 text-weight-bolder text-grey-9">
+              <div class="text-caption text-grey-6 text-weight-medium">ITEMS SIN STOCK</div>
+              <div class="text-h6 text-weight-bolder text-negative">
                 {{ formatNumber(stats.totalRegistros) }}
               </div>
             </div>
-            <q-avatar color="blue-1" text-color="primary" icon="view_list" size="40px" />
-          </q-card-section>
-        </q-card>
-      </div>
-
-      <div class="col-12 col-sm-6 col-md-3">
-        <q-card flat class="rounded-borders bg-white shadow-1 border-left-positive">
-          <q-card-section class="q-pa-sm row items-center justify-between">
-            <div>
-              <div class="text-caption text-grey-6 text-weight-medium">UNIDADES EN STOCK</div>
-              <div class="text-h6 text-weight-bolder text-positive">
-                {{ formatNumber(stats.totalUnidades) }}
-              </div>
-            </div>
-            <q-avatar color="green-1" text-color="positive" icon="widgets" size="40px" />
+            <q-avatar color="red-1" text-color="negative" icon="remove_shopping_cart" size="40px" />
           </q-card-section>
         </q-card>
       </div>
@@ -75,12 +61,12 @@
         <q-card flat class="rounded-borders bg-white shadow-1 border-left-warning">
           <q-card-section class="q-pa-sm row items-center justify-between">
             <div>
-              <div class="text-caption text-grey-6 text-weight-medium">VALOR TOTAL COMPRA</div>
+              <div class="text-caption text-grey-6 text-weight-medium">UNIDADES FALTANTES</div>
               <div class="text-h6 text-weight-bolder text-amber-9">
-                {{ formatCurrency(stats.valorTotalCompra) }}
+                {{ formatNumber(stats.totalUnidades) }}
               </div>
             </div>
-            <q-avatar color="amber-1" text-color="amber-9" icon="shopping_bag" size="40px" />
+            <q-avatar color="amber-1" text-color="amber-9" icon="inventory" size="40px" />
           </q-card-section>
         </q-card>
       </div>
@@ -89,90 +75,85 @@
         <q-card flat class="rounded-borders bg-white shadow-1 border-left-info">
           <q-card-section class="q-pa-sm row items-center justify-between">
             <div>
-              <div class="text-caption text-grey-6 text-weight-medium">VALOR TOTAL VENTA</div>
+              <div class="text-caption text-grey-6 text-weight-medium">VALOR EN COMPRA</div>
               <div class="text-h6 text-weight-bolder text-indigo-9">
+                {{ formatCurrency(stats.valorTotalCompra) }}
+              </div>
+            </div>
+            <q-avatar color="indigo-1" text-color="indigo-9" icon="shopping_bag" size="40px" />
+          </q-card-section>
+        </q-card>
+      </div>
+
+      <div class="col-12 col-sm-6 col-md-3">
+        <q-card flat class="rounded-borders bg-white shadow-1 border-left-purple">
+          <q-card-section class="q-pa-sm row items-center justify-between">
+            <div>
+              <div class="text-caption text-grey-6 text-weight-medium">VALOR EN VENTA</div>
+              <div class="text-h6 text-weight-bolder text-purple-9">
                 {{ formatCurrency(stats.valorTotalVenta) }}
               </div>
             </div>
-            <q-avatar color="indigo-1" text-color="indigo-9" icon="payments" size="40px" />
+            <q-avatar color="purple-1" text-color="purple-9" icon="payments" size="40px" />
           </q-card-section>
         </q-card>
       </div>
     </div>
 
-    <!-- Card de Filtros: Nombre, Referencia y Sede -->
+    <!-- Card de Filtros -->
     <q-card flat class="col-auto rounded-borders q-mb-md bg-white shadow-1">
       <q-card-section class="q-py-sm">
         <div class="row items-center q-col-gutter-md">
-
-          <!-- Filtro por Referencia -->
-          <div class="col-12 col-sm-4 col-md-3">
+          <!-- Buscador principal -->
+          <div class="col-12 col-sm-6 col-md-6">
             <q-input
-              v-model="referenciaFilter"
+              v-model="searchTerm"
               dense
               outlined
               clearable
-              placeholder="Ej: 001 26-31"
-              label="Filtrar por Referencia / Ítem"
+              placeholder="Buscar por Ítem, Nombre, Talla, Color o Empresa..."
+              label="Buscar ítem sin inventario"
               debounce="350"
               @update:model-value="onFilterChange"
             >
               <template v-slot:prepend>
-                <q-icon name="qr_code" />
+                <q-icon name="search" />
               </template>
             </q-input>
           </div>
 
-          <!-- Filtro por Nombre -->
-          <div class="col-12 col-sm-4 col-md-4">
-            <q-input
-              v-model="nombreFilter"
-              dense
-              outlined
-              clearable
-              placeholder="Ej: TENNI INFANTIL"
-              label="Filtrar por Nombre / Descripción"
-              debounce="350"
-              @update:model-value="onFilterChange"
-            >
-              <template v-slot:prepend>
-                <q-icon name="label" />
-              </template>
-            </q-input>
-          </div>
-
-          <!-- Filtro por Sede -->
+          <!-- Filtro Empresa Scope -->
           <div class="col-12 col-sm-4 col-md-4">
             <q-select
-              v-model="sedeFilter"
+              v-model="empresaScope"
               dense
               outlined
-              clearable
               emit-value
               map-options
-              option-value="id"
-              option-label="nombre"
-              label="Filtrar por Sede / Empresa"
-              :options="sedesOptions"
+              label="Empresa / Sede"
+              :options="[
+                { label: 'Mi Empresa', value: 'actual' },
+                { label: 'Todas las Empresas', value: 'todas' }
+              ]"
               @update:model-value="onFilterChange"
             >
               <template v-slot:prepend>
-                <q-icon name="storefront" />
+                <q-icon name="store" />
               </template>
             </q-select>
           </div>
 
-          <!-- Botón Limpiar Filtros -->
-          <div class="col-12 col-sm-12 col-md-1 text-right">
+          <!-- Botón Limpiar -->
+          <div class="col-12 col-sm-2 col-md-2 text-right">
             <q-btn flat round color="grey-7" icon="clear_all" dense @click="clearFilters">
-              <q-tooltip>Limpiar Todos los Filtros</q-tooltip>
+              <q-tooltip>Limpiar Filtros</q-tooltip>
             </q-btn>
           </div>
         </div>
       </q-card-section>
     </q-card>
 
-    <!-- Tabla Principal de Inventario General -->
+    <!-- Tabla Principal con Paginación Servidor -->
     <q-card flat class="col column no-wrap overflow-hidden rounded-borders bg-white shadow-1">
       <q-table
         :rows="rows"
@@ -180,16 +161,16 @@
         row-key="item"
         class="col header-tablet border-table border-row full-height-table"
         :loading="loading"
-        no-data-label="No se encontraron registros de inventario general"
+        no-data-label="No hay ítems sin inventario que mostrar"
         v-model:pagination="pagination"
         @request="onRequest"
         binary-state-sort
         flat
       >
-        <!-- Cell: Item Code / Referencia -->
+        <!-- Cell: Item Code -->
         <template v-slot:body-cell-item="props">
           <q-td :props="props">
-            <q-chip dense color="indigo-1" text-color="indigo-9" class="text-weight-bold font-mono">
+            <q-chip dense color="red-1" text-color="negative" class="text-weight-bold font-mono">
               {{ props.row.item }}
             </q-chip>
           </q-td>
@@ -227,7 +208,7 @@
           <q-td :props="props" align="right">
             <q-chip
               dense
-              color="positive"
+              color="negative"
               text-color="white"
               class="text-weight-bold q-px-sm"
             >
@@ -250,28 +231,10 @@
           </q-td>
         </template>
 
-        <!-- Cell: Subtotal Compra -->
-        <template v-slot:body-cell-subtotal_compra="props">
-          <q-td :props="props" align="right">
-            <span class="text-grey-9 font-mono">
-              {{ formatCurrency(Number(props.row.unidades || 0) * Number(props.row.precio_compra || 0)) }}
-            </span>
-          </q-td>
-        </template>
-
-        <!-- Cell: Subtotal Venta -->
-        <template v-slot:body-cell-subtotal_venta="props">
-          <q-td :props="props" align="right">
-            <span class="text-weight-bold text-indigo-9 font-mono">
-              {{ formatCurrency(Number(props.row.unidades || 0) * Number(props.row.precio_venta || 0)) }}
-            </span>
-          </q-td>
-        </template>
-
-        <!-- Cell: Empresa / Sede -->
+        <!-- Cell: Empresa -->
         <template v-slot:body-cell-empresa="props">
           <q-td :props="props">
-            <q-chip dense color="deep-purple-1" text-color="deep-purple-9" icon="storefront" class="text-weight-medium text-caption">
+            <q-chip dense color="blue-grey-1" text-color="blue-grey-9" icon="business" class="text-caption">
               {{ props.row.empresa || '-' }}
             </q-chip>
           </q-td>
@@ -286,18 +249,17 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useQuasar } from 'quasar';
-import { inventarioApi, InventarioItem, InventarioStats, SedeItem } from 'src/api/inventario';
+import { useAuthStore } from 'src/stores/auth';
+import { inventarioApi, InventarioItem, InventarioStats } from 'src/api/inventario';
 
 const $q = useQuasar();
+const authStore = useAuthStore();
 
 // Reactive State
 const loading = ref(false);
 const rows = ref<InventarioItem[]>([]);
-const sedesOptions = ref<SedeItem[]>([]);
-
-const nombreFilter = ref('');
-const referenciaFilter = ref('');
-const sedeFilter = ref<number | null>(null);
+const searchTerm = ref('');
+const empresaScope = ref<'actual' | 'todas'>('actual');
 
 const stats = ref<InventarioStats>({
   totalRegistros: 0,
@@ -316,16 +278,14 @@ const pagination = ref({
 
 // Table Columns definition
 const columns = [
-  { name: 'item', label: 'Referencia / Ítem', field: 'item', align: 'left' as const, sortable: true },
-  { name: 'nombre', label: 'Nombre / Descripción', field: 'nombre', align: 'left' as const, sortable: true },
+  { name: 'item', label: 'Ítem (Código)', field: 'item', align: 'left' as const, sortable: true },
+  { name: 'nombre', label: 'Descripción / Nombre', field: 'nombre', align: 'left' as const, sortable: true },
   { name: 'talla', label: 'Talla', field: 'talla', align: 'center' as const, sortable: true },
   { name: 'color', label: 'Color', field: 'color', align: 'center' as const, sortable: true },
   { name: 'unidades', label: 'Stock (Unids)', field: 'unidades', align: 'right' as const, sortable: true },
   { name: 'precio_compra', label: 'P. Compra', field: 'precio_compra', align: 'right' as const, sortable: true },
   { name: 'precio_venta', label: 'P. Venta', field: 'precio_venta', align: 'right' as const, sortable: true },
-  { name: 'subtotal_compra', label: 'Valor Compra', field: (row: InventarioItem) => Number(row.unidades || 0) * Number(row.precio_compra || 0), align: 'right' as const, sortable: false },
-  { name: 'subtotal_venta', label: 'Valor Venta', field: (row: InventarioItem) => Number(row.unidades || 0) * Number(row.precio_venta || 0), align: 'right' as const, sortable: false },
-  { name: 'empresa', label: 'Sede / Empresa', field: 'empresa', align: 'left' as const, sortable: true },
+  { name: 'empresa', label: 'Empresa / Sede', field: 'empresa', align: 'left' as const, sortable: true },
 ];
 
 // Helper Formatter Functions
@@ -346,24 +306,15 @@ function formatNumber(value: number | string | undefined): string {
   }).format(num);
 }
 
-// Load Sedes for dropdown
-async function loadSedes() {
-  try {
-    const res = await inventarioApi.getSedes();
-    sedesOptions.value = res.data;
-  } catch (error) {
-    console.error('Error cargando sedes:', error);
-  }
-}
-
-// Data Fetching logic for Inventario General
+// Data Fetching logic
 async function fetchData() {
   loading.value = true;
   try {
-    const res = await inventarioApi.getGeneral({
-      empresa_id: sedeFilter.value || undefined,
-      nombre: nombreFilter.value || undefined,
-      referencia: referenciaFilter.value || undefined,
+    const empresaId = empresaScope.value === 'actual' ? authStore.user?.empresaId || 1 : undefined;
+
+    const res = await inventarioApi.getSinInventario({
+      empresa_id: empresaId,
+      search: searchTerm.value || undefined,
       page: pagination.value.page,
       limit: pagination.value.rowsPerPage,
       sort_by: pagination.value.sortBy,
@@ -376,10 +327,10 @@ async function fetchData() {
       stats.value = res.data.stats;
     }
   } catch (error) {
-    console.error('Error cargando inventario general:', error);
+    console.error('Error cargando items sin inventario:', error);
     $q.notify({
       type: 'negative',
-      message: 'Error al cargar el inventario general',
+      message: 'Error al cargar los ítems sin inventario',
       position: 'top',
     });
   } finally {
@@ -402,9 +353,8 @@ function onFilterChange() {
 }
 
 function clearFilters() {
-  nombreFilter.value = '';
-  referenciaFilter.value = '';
-  sedeFilter.value = null;
+  searchTerm.value = '';
+  empresaScope.value = 'actual';
   pagination.value.page = 1;
   fetchData();
 }
@@ -413,7 +363,7 @@ function clearFilters() {
 function exportCSV() {
   if (rows.value.length === 0) return;
 
-  const headers = ['Referencia', 'Nombre', 'Talla', 'Color', 'Unidades', 'Precio Compra', 'Precio Venta', 'Sede'];
+  const headers = ['Item', 'Nombre', 'Talla', 'Color', 'Unidades', 'Precio Compra', 'Precio Venta', 'Empresa'];
   const csvRows = [headers.join(',')];
 
   rows.value.forEach((row) => {
@@ -435,7 +385,7 @@ function exportCSV() {
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.setAttribute('href', url);
-  link.setAttribute('download', `inventario_general_${new Date().toISOString().slice(0,10)}.csv`);
+  link.setAttribute('download', `items_sin_inventario_${new Date().toISOString().slice(0,10)}.csv`);
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
@@ -448,7 +398,6 @@ function exportCSV() {
 }
 
 onMounted(() => {
-  loadSedes();
   fetchData();
 });
 </script>
@@ -458,12 +407,8 @@ onMounted(() => {
   font-family: 'Fira Code', 'Courier New', Courier, monospace;
 }
 
-.border-left-primary {
-  border-left: 4px solid #1976D2;
-}
-
-.border-left-positive {
-  border-left: 4px solid #2E7D32;
+.border-left-negative {
+  border-left: 4px solid #C62828;
 }
 
 .border-left-warning {
@@ -471,6 +416,10 @@ onMounted(() => {
 }
 
 .border-left-info {
-  border-left: 4px solid #3F51B5;
+  border-left: 4px solid #1976D2;
+}
+
+.border-left-purple {
+  border-left: 4px solid #7B1FA2;
 }
 </style>

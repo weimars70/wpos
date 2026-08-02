@@ -38,6 +38,7 @@ const routes = [
       { path: '/inventario/general', component: () => import('pages/inventario/InventarioGeneralPage.vue') },
       { path: '/inventario/listado-ajustes', component: () => import('pages/inventario/ListadoAjustesPage.vue') },
       { path: '/inventario/listado-inventario', component: () => import('pages/inventario/ListadoInventarioPage.vue') },
+      { path: '/inventario/items-sin-inventario', component: () => import('pages/inventario/ItemsSinInventarioPage.vue') },
       { path: '/inventario/listado-traslados', component: () => import('pages/inventario/ListadoTrasladosPage.vue') },
       { path: '/inventario/movimiento-items', component: () => import('pages/inventario/MovimientoItemsPage.vue') },
       { path: '/inventario/movimiento-items-filtrar', component: () => import('pages/inventario/MovimientoItemsFiltrarPage.vue') },

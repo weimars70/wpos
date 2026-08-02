@@ -114,6 +114,10 @@
             <q-item-section avatar><q-icon name="arrow_right" size="xs" /></q-item-section>
             <q-item-section>Listado Inventario</q-item-section>
           </q-item>
+          <q-item clickable v-ripple to="/inventario/items-sin-inventario" active-class="bg-blue-1 text-primary" class="rounded-borders q-ml-md q-mr-sm q-mb-xs">
+            <q-item-section avatar><q-icon name="arrow_right" size="xs" /></q-item-section>
+            <q-item-section>Items Sin Inventario</q-item-section>
+          </q-item>
           <q-item clickable v-ripple to="/inventario/listado-traslados" active-class="bg-blue-1 text-primary" class="rounded-borders q-ml-md q-mr-sm q-mb-xs">
             <q-item-section avatar><q-icon name="arrow_right" size="xs" /></q-item-section>
             <q-item-section>Listado Traslados</q-item-section>
