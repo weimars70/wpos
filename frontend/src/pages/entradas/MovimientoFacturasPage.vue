@@ -2,11 +2,10 @@
   <q-page padding class="bg-grey-2 aurora-animate">
     <div class="row items-center justify-between q-mb-md">
       <div>
-        <div class="text-h5 text-primary text-weight-bold">Movimientos de Facturas</div>
+        <div class="text-h5 text-primary text-weight-bold">Movimientos de facturas:</div>
         <div class="text-caption text-grey-7">Registro detallado de transacciones (salidas_movimientos)</div>
       </div>
-      <q-btn
-        flat
+      <q-btn        
         round
         color="primary"
         icon="refresh"
@@ -22,7 +21,7 @@
       :rows="rows"
       :columns="columns"
       row-key="id"
-      class="rounded-borders shadow-1 bg-white"
+      class="col rounded-borders header-tablet border-table border-row full-height-table"
       :loading="loading"
       :filter="filter"
       no-data-label="No se encontraron movimientos de facturas"
@@ -146,5 +145,45 @@ function formatCurrency(val: number) {
 <style scoped>
 .rounded-borders {
   border-radius: 12px;
+}
+
+.border-table{
+    background:white; 
+    border: 1px blueviolet solid;   
+    color: black;
+}
+
+.border-row :deep(thead tr), .border-row :deep(td) {
+  border-bottom: 1px blue solid;  
+}
+
+.header-tablet :deep(thead th) {
+  background-color: #adc2ad;
+  color: black;
+  font-weight: bold;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.full-height-table {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: 100%;
+  overflow: hidden;
+}
+
+.full-height-table :deep(.q-table__container) {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: 100%;
+}
+
+.full-height-table :deep(.q-table__middle) {
+  flex: 1 1 auto;
+  max-height: calc(100vh - 315px);
+  overflow-y: auto;
 }
 </style>

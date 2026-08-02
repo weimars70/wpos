@@ -4,16 +4,16 @@
       <div class="row items-center q-gutter-sm">
         <div>
           <div class="row items-center q-gutter-sm">
-            <div class="text-h5 text-primary text-weight-bold">Control de Compras (Entradas)</div>
-            <q-chip color="primary" text-color="white" dense class="text-weight-bold q-px-sm" icon="inventory_2">
+            <div class="text-h5 text-primary text-weight-bold">Control de compras: 
+              <q-chip color="primary" text-color="white" dense class="text-weight q-px-sm q-chip-compras" icon="inventory_2">
               {{ rows.length }} Compras
             </q-chip>
+            </div>            
           </div>
           <div class="text-caption text-grey-7">Listado histórico (Scroll Infinito por Cursor)</div>
         </div>
       </div>
-      <q-btn
-        flat
+      <q-btn        
         round
         color="primary"
         icon="refresh"
@@ -28,7 +28,7 @@
     <q-card flat class="col-auto rounded-borders q-mb-md bg-white shadow-1">
       <q-card-section class="q-py-sm">
         <div class="row items-center q-col-gutter-md">
-          <div class="col-12 col-sm-4 col-md-3">
+          <div class="col-12 col-sm-2 col-md-2">
             <q-input
               v-model="proveedorFilter"
               dense
@@ -36,7 +36,7 @@
               clearable
               placeholder="Proveedor o NIT"
               label="Buscar por Proveedor"
-              debounce="400"
+              debounce="200"
               @update:model-value="resetAndFetch"
             >
               <template v-slot:prepend>
@@ -44,7 +44,7 @@
               </template>
             </q-input>
           </div>
-          <div class="col-12 col-sm-3 col-md-2">
+          <div class="col-12 col-sm-2 col-md-2">
             <q-input
               v-model="fechaInicio"
               type="date"
@@ -55,7 +55,7 @@
               @change="resetAndFetch"
             />
           </div>
-          <div class="col-12 col-sm-3 col-md-2">
+          <div class="col-12 col-sm-2 col-md-2">
             <q-input
               v-model="fechaFin"
               type="date"
@@ -65,14 +65,29 @@
               stack-label
               @change="resetAndFetch"
             />
-          </div>
-          <div class="col-12 col-sm-2 col-md-3 row items-center q-gutter-xs">
-            <q-btn color="primary" icon="search" label="Buscar" dense unelevated @click="resetAndFetch" />
-            <q-btn flat round color="grey-7" icon="clear" dense @click="clearFilters">
+          </div>          
+          <div class="col-12 col-sm-2 col-md-2 q-gutter-sm">
+            <q-btn outline icon="search" label="Buscar" @click="resetAndFetch" class="btn-buscar"/>
+            <q-btn outline icon="clear" @click="clearFilters" class="btn-clear-filter">
               <q-tooltip>Limpiar Filtros</q-tooltip>
             </q-btn>
+          </div>        
+        <div class="col-12 col-sm-4 col-md-4 row items-center q-gutter-xs">            
+            <q-btn-toggle
+              v-model="scope"
+              color="white"
+              toggle-color="white"
+              text-color="black"
+              toggle-text-color="black"                           
+              class="toggle-outline"             
+              :options="[
+                { label: 'Esta Tienda', value: 'tienda' },
+                { label: 'Todas las Tiendas del Grupo', value: 'grupo' }
+              ]"
+              @update:model-value="resetAndFetch"
+            />
           </div>
-        </div>
+          </div>
       </q-card-section>
     </q-card>
 
@@ -88,40 +103,7 @@
         no-data-label="No se encontraron registros de compras"
         :pagination="{ rowsPerPage: 0 }"  
         virtual-scroll      
-       >
-        <template v-slot:top-left>
-          <div class="row items-center q-gutter-sm">
-            <span class="text-caption text-grey-8 text-weight-bold">Ver:</span>
-            <q-btn-toggle
-              v-model="scope"
-              toggle-color="primary"
-              flat
-              dense
-              rounded
-              unelevated
-              :options="[
-                { label: 'Esta Tienda', value: 'tienda' },
-                { label: 'Todas las Tiendas del Grupo', value: 'grupo' }
-              ]"
-              @update:model-value="resetAndFetch"
-            />
-          </div>
-        </template>
-
-        <template v-slot:top-right>
-          <q-input
-            borderless
-            dense
-            debounce="300"
-            v-model="filter"
-            placeholder="Filtrar en tabla..."
-            style="min-width: 200px"
-          >
-            <template v-slot:append>
-              <q-icon name="search" />
-            </template>
-          </q-input>
-        </template>
+       >        
 
         <!-- Slot para ID / Código -->
         <template v-slot:body-cell-codigo="props">
@@ -297,6 +279,16 @@ function formatCurrency(val: number) {
   border-radius: 12px;
 }
 
+.border-table{
+    background:white; 
+    border: 1px blueviolet solid;   
+    color: black;
+}
+
+.border-row :deep(thead tr), .border-row :deep(td) {
+  border-bottom: 1px blue solid;  
+}
+
 .header-tablet :deep(thead th) {
   background-color: #adc2ad;
   color: black;
@@ -304,6 +296,30 @@ function formatCurrency(val: number) {
   position: sticky;
   top: 0;
   z-index: 1;
+}
+
+.mi-toggle :deep(.q-btn) { 
+  border: 1px solid black;  
+  height: 42px;
+}
+
+.mi-toggle :deep(.q-btn.q-btn--active) {  
+  border-color: black;
+}
+
+.q-chip-compras{
+  height: 30px;
+}
+
+.btn-buscar{
+  width: 8vw;
+  height: 42px;
+  border-radius: 5px;
+}
+
+.btn-clear-filter{
+  width: 3vw;
+  height: 42px;
 }
 
 .full-height-table {
@@ -323,7 +339,7 @@ function formatCurrency(val: number) {
 
 .full-height-table :deep(.q-table__middle) {
   flex: 1 1 auto;
-  max-height: 100%;
+  max-height: calc(100vh - 235px);
   overflow-y: auto;
 }
 </style>

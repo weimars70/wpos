@@ -1,7 +1,7 @@
 <template>
   <q-page padding>
     <div class="row items-center justify-between q-mb-md">
-      <div class="text-h5 text-primary text-weight-bold">Tipo Iva</div>
+      <div class="text-h5 text-primary text-weight-bold">Tipo iva</div>
       <q-btn color="primary" icon="add" label="Agregar Tipo Iva" @click="openNew" class="shadow-1 q-px-md rounded-borders"/>
     </div>
 
