@@ -1,9 +1,16 @@
 <template>
   <q-page padding class="bg-grey-2 aurora-animate">
     <div class="row items-center justify-between q-mb-md">
-      <div>
-        <div class="text-h5 text-primary text-weight-bold">Control de Compras (Entradas)</div>
-        <div class="text-caption text-grey-7">Listado histórico (Scroll Infinito por Cursor)</div>
+      <div class="row items-center q-gutter-sm">
+        <div>
+          <div class="row items-center q-gutter-sm">
+            <div class="text-h5 text-primary text-weight-bold">Control de Compras (Entradas)</div>
+            <q-chip color="primary" text-color="white" dense class="text-weight-bold q-px-sm" icon="inventory_2">
+              {{ rows.length }} Compras
+            </q-chip>
+          </div>
+          <div class="text-caption text-grey-7">Listado histórico (Scroll Infinito por Cursor)</div>
+        </div>
       </div>
       <q-btn
         flat
@@ -16,6 +23,58 @@
         <q-tooltip>Refrescar datos</q-tooltip>
       </q-btn>
     </div>
+
+    <!-- Card de Filtros Avanzados (Proveedor y Rango de Fechas) -->
+    <q-card flat class="rounded-borders q-mb-md bg-white shadow-1">
+      <q-card-section class="q-py-sm">
+        <div class="row items-center q-col-gutter-md">
+          <div class="col-12 col-sm-4 col-md-3">
+            <q-input
+              v-model="proveedorFilter"
+              dense
+              outlined
+              clearable
+              placeholder="Proveedor o NIT"
+              label="Buscar por Proveedor"
+              debounce="400"
+              @update:model-value="resetAndFetch"
+            >
+              <template v-slot:prepend>
+                <q-icon name="person_search" />
+              </template>
+            </q-input>
+          </div>
+          <div class="col-12 col-sm-3 col-md-2">
+            <q-input
+              v-model="fechaInicio"
+              type="date"
+              dense
+              outlined
+              label="Fecha Desde"
+              stack-label
+              @change="resetAndFetch"
+            />
+          </div>
+          <div class="col-12 col-sm-3 col-md-2">
+            <q-input
+              v-model="fechaFin"
+              type="date"
+              dense
+              outlined
+              label="Fecha Hasta"
+              stack-label
+              @change="resetAndFetch"
+            />
+          </div>
+          <div class="col-12 col-sm-2 col-md-3 row items-center q-gutter-xs">
+            <q-btn color="primary" icon="search" label="Buscar" dense unelevated @click="resetAndFetch" />
+            <q-btn flat round color="grey-7" icon="clear" dense @click="clearFilters">
+              <q-tooltip>Limpiar Filtros</q-tooltip>
+            </q-btn>
+          </div>
+        </div>
+      </q-card-section>
+    </q-card>
 
     <!-- Scroll Infinito + Tabla de Compras -->
     <q-infinite-scroll @load="onLoad" :offset="250" :disable="!hasMore || loading">
@@ -55,8 +114,8 @@
             dense
             debounce="300"
             v-model="filter"
-            placeholder="Buscar proveedor o ID..."
-            style="min-width: 300px"
+            placeholder="Filtrar en tabla..."
+            style="min-width: 200px"
           >
             <template v-slot:append>
               <q-icon name="search" />
@@ -87,6 +146,15 @@
           <q-td :props="props">
             <div class="text-weight-medium">{{ props.row.nombre }}</div>
             <div class="text-caption text-grey-6">{{ props.row.ident }}</div>
+          </q-td>
+        </template>
+
+        <!-- Slot para Cant. Unidades -->
+        <template v-slot:body-cell-total_unidades="props">
+          <q-td :props="props" class="text-right text-weight-medium">
+            <q-chip dense color="grey-2" text-color="grey-9">
+              {{ props.row.total_unidades || 0 }}
+            </q-chip>
           </q-td>
         </template>
 
@@ -130,6 +198,10 @@ const rows = ref<any[]>([]);
 const filter = ref('');
 const scope = ref<'tienda' | 'grupo'>('tienda');
 
+const proveedorFilter = ref('');
+const fechaInicio = ref('');
+const fechaFin = ref('');
+
 const nextCursor = ref<number | null>(null);
 const hasMore = ref(true);
 
@@ -138,6 +210,7 @@ const columns = [
   { name: 'fecha', label: 'Fecha', field: 'fecha', align: 'left', sortable: true, format: (val: string) => date.formatDate(val, 'DD/MM/YYYY') },
   { name: 'sucursal', label: 'Tienda / Sucursal', field: 'n_sucursal', align: 'left', sortable: true },
   { name: 'proveedor', label: 'Proveedor', field: 'nombre', align: 'left', sortable: true },
+  { name: 'total_unidades', label: 'Cant. Unidades', field: 'total_unidades', align: 'right', sortable: true },
   { name: 'total', label: 'Total', field: 'total', align: 'right', sortable: true },
   { name: 'saldo', label: 'Saldo Pendiente', field: 'saldo', align: 'right', sortable: true },
 ] as any[];
@@ -145,6 +218,14 @@ const columns = [
 onMounted(() => {
   resetAndFetch();
 });
+
+function clearFilters() {
+  proveedorFilter.value = '';
+  fechaInicio.value = '';
+  fechaFin.value = '';
+  filter.value = '';
+  resetAndFetch();
+}
 
 async function resetAndFetch() {
   rows.value = [];
@@ -173,6 +254,9 @@ async function loadNextBatch(done?: (stop?: boolean) => void) {
       scope.value,
       nextCursor.value ?? undefined,
       30,
+      proveedorFilter.value || undefined,
+      fechaInicio.value || undefined,
+      fechaFin.value || undefined,
     );
 
     if (data && data.items && data.items.length > 0) {
