@@ -10,7 +10,7 @@
       :rows="rows"
       :columns="columns"
       row-key="codigo"
-      class="rounded-borders shadow-1"
+      class="rounded-borders shadow-1 header-tablet border-table border-row scroll-tablet"
       :loading="loading"
       no-data-label="No hay datos disponibles"
     >
@@ -212,5 +212,37 @@ async function saveData() {
 <style scoped>
 .rounded-borders {
   border-radius: 8px;
+}
+
+.border-table{
+    background:white; 
+    border: 1px blueviolet solid;   
+    color: black;
+}
+
+.border-row :deep(thead tr), .border-row :deep(td) {
+  border-bottom: 1px blue solid;  
+}
+
+.header-tablet :deep(thead th) {
+  background-color:#adc2ad;
+  color:black;
+  font: bold;
+}
+
+.scroll-tablet :deep(.q-table__middle) {
+  overflow-y: auto;
+}
+
+@media (max-width: 1365px) {
+  .scroll-tablet :deep(.q-table__middle) {
+    max-height: 42vh;
+  }
+}
+
+@media (min-width: 1366px) and (max-width: 1920px) {
+  .scroll-tablet :deep(.q-table__middle) {
+    max-height: 55vh;
+  }
 }
 </style>

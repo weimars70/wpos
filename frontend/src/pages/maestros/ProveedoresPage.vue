@@ -10,20 +10,44 @@
       :rows="rows"
       :columns="columns"
       row-key="codigo"
-      class="rounded-borders shadow-1"
+      class="rounded-borders shadow-1 header-tablet border-table border-row scroll-tablet"
       :loading="loading"
       no-data-label="No hay datos disponibles"
+      :pagination="{ rowsPerPage: 0 }"
+      virtual-scroll
     >
-      <template v-slot:body-cell-actions="props">
-        <q-td :props="props" class="q-gutter-sm">
-          <q-btn flat round color="blue" icon="edit" size="sm" @click="editRow(props.row)">
-            <q-tooltip>Editar</q-tooltip>
-          </q-btn>
-          <q-btn flat round color="red" icon="delete" size="sm" @click="deleteRow(props.row)">
-            <q-tooltip>Eliminar</q-tooltip>
-          </q-btn>
+    <template v-slot:body-cell-actions="props">
+        <q-td :props="props" align="center">
+          <div class="row items-center justify-center no-wrap q-gutter-xs">
+            <q-btn
+              unelevated
+              round
+              dense
+              size="sm"
+              color="indigo-1"
+              text-color="indigo-9"
+              icon="edit_note"
+              @click="editRow(props.row)"
+              class="action-btn shadow-1"
+            >
+              <q-tooltip class="bg-indigo-9 text-caption">Editar Item</q-tooltip>
+            </q-btn>
+            <q-btn
+              unelevated
+              round
+              dense
+              size="sm"
+              color="pink-1"
+              text-color="pink-8"
+              icon="delete_forever"
+              @click="deleteRow(props.row)"
+              class="action-btn shadow-1"
+            >
+              <q-tooltip class="bg-pink-9 text-caption">Eliminar Item</q-tooltip>
+            </q-btn>
+          </div>
         </q-td>
-      </template>
+      </template>     
     </q-table>
 
     <!-- Modal Formulario -->
@@ -82,9 +106,7 @@ const formData = reactive({
   nombre: '' as string,
   nombre_comercial: '' as string,
   contacto: '' as string,
-  telefono1: '' as string,
-  telefono2: '' as string,
-  fax: '' as string,
+  telefono1: '' as string,  
   email: '' as string,
   observaciones: '' as string,
   fecha: '' as string,
@@ -95,21 +117,19 @@ const formData = reactive({
 
 // Definición de tabla
 const columns = [
+  { name: 'actions', label: 'Acciones', field: 'actions', align: 'center' },
   { name: 'codigo', label: 'Código', field: 'codigo', align: 'left', sortable: true },
   { name: 'ident', label: 'Identificación', field: 'ident', align: 'left', sortable: true },
   { name: 'nombre', label: 'Nombre', field: 'nombre', align: 'left', sortable: true },
   { name: 'nombre_comercial', label: 'Nombre Comercial', field: 'nombre_comercial', align: 'left', sortable: true },
   { name: 'contacto', label: 'Contacto', field: 'contacto', align: 'left', sortable: true },
-  { name: 'telefono1', label: 'Teléfono 1', field: 'telefono1', align: 'left', sortable: true },
-  { name: 'telefono2', label: 'Teléfono 2', field: 'telefono2', align: 'left', sortable: true },
-  { name: 'fax', label: 'Fax', field: 'fax', align: 'left', sortable: true },
+  { name: 'telefono1', label: 'Teléfono 1', field: 'telefono1', align: 'left', sortable: true },  
   { name: 'email', label: 'Email', field: 'email', align: 'left', sortable: true },
   { name: 'observaciones', label: 'Observaciones', field: 'observaciones', align: 'left', sortable: true },
   { name: 'fecha', label: 'Fecha', field: 'fecha', align: 'left', sortable: true },
   { name: 'usuario', label: 'Usuario', field: 'usuario', align: 'left', sortable: true },
   { name: 'tipo_ident', label: 'Tipo Ident.', field: 'tipo_ident', align: 'left', sortable: true },
-  { name: 'direccion', label: 'Dirección', field: 'direccion', align: 'left', sortable: true },
-  { name: 'actions', label: 'Acciones', field: 'actions', align: 'center' }
+  { name: 'direccion', label: 'Dirección', field: 'direccion', align: 'left', sortable: true }  
 ] as any[];
 
 const rows = ref<any[]>([]);
@@ -137,9 +157,7 @@ function openNew() {
   formData.nombre = '';
   formData.nombre_comercial = '';
   formData.contacto = '';
-  formData.telefono1 = '';
-  formData.telefono2 = '';
-  formData.fax = '';
+  formData.telefono1 = '';  
   formData.email = '';
   formData.observaciones = '';
   formData.fecha = '';
@@ -156,9 +174,7 @@ function editRow(row: any) {
   formData.nombre = row.nombre;
   formData.nombre_comercial = row.nombre_comercial;
   formData.contacto = row.contacto;
-  formData.telefono1 = row.telefono1;
-  formData.telefono2 = row.telefono2;
-  formData.fax = row.fax;
+  formData.telefono1 = row.telefono1; 
   formData.email = row.email;
   formData.observaciones = row.observaciones;
   formData.fecha = row.fecha;
@@ -194,9 +210,7 @@ async function saveData() {
       nombre: formData.nombre,
       nombre_comercial: formData.nombre_comercial,
       contacto: formData.contacto,
-      telefono1: formData.telefono1,
-      telefono2: formData.telefono2,
-      fax: formData.fax,
+      telefono1: formData.telefono1,      
       email: formData.email,
       observaciones: formData.observaciones,
       fecha: formData.fecha,
@@ -224,5 +238,37 @@ async function saveData() {
 <style scoped>
 .rounded-borders {
   border-radius: 8px;
+}
+
+.border-table{
+    background:white; 
+    border: 1px blueviolet solid;   
+    color: black;
+}
+
+.border-row :deep(thead tr), .border-row :deep(td) {
+  border-bottom: 1px blue solid;  
+}
+
+.header-tablet :deep(thead th) {
+  background-color:#adc2ad;
+  color:black;
+  font: bold;
+}
+
+.scroll-tablet :deep(.q-table__middle) {
+  overflow-y: auto;
+}
+
+@media (max-width: 1365px) {
+  .scroll-tablet :deep(.q-table__middle) {
+    max-height: 42vh;
+  }
+}
+
+@media (min-width: 1366px) and (max-width: 1920px) {
+  .scroll-tablet :deep(.q-table__middle) {
+    max-height: 55vh;
+  }
 }
 </style>
