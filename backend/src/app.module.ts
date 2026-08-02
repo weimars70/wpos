@@ -27,6 +27,7 @@ import { SalidasModule } from './salidas/salidas.module';
 import { EntradasModule } from './entradas/entradas.module';
 import { User } from './users/user.entity';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { InventarioModule } from './inventario/inventario.module';
 
 @Module({
   imports: [
@@ -69,6 +70,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
     MedioPagoModule,
     EntradasModule,
     DashboardModule,
+    InventarioModule,
   ],
 })
 export class AppModule {}
