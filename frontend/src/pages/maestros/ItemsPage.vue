@@ -25,9 +25,11 @@
       :rows="rows"      
       :columns="columns"
       row-key="item"      
-      class="rounded-borders header-tablet border-table border-row"      
+      class="rounded-borders header-tablet border-table border-row scroll-tablet"      
       :loading="loading"
       no-data-label="No hay datos disponibles"
+      :pagination="{ rowsPerPage: 0 }"
+      virtual-scroll  
     >
       <template v-slot:body-cell-imagen="props">
         <q-td :props="props" align="center">
@@ -575,5 +577,21 @@ async function saveData() {
   background-color:#adc2ad;
   color:black;
   font: bold;
+}
+
+.scroll-tablet :deep(.q-table__middle) {
+  overflow-y: auto;
+}
+
+@media (max-width: 1365px) {
+  .scroll-tablet :deep(.q-table__middle) {
+    max-height: 42vh;
+  }
+}
+
+@media (min-width: 1366px) and (max-width: 1920px) {
+  .scroll-tablet :deep(.q-table__middle) {
+    max-height: 55vh;
+  }
 }
 </style>

@@ -12,8 +12,20 @@ export class EntradasController {
   }
 
   @Get('compras')
-  async findCompras(@Query('empresa_id') empresaId: number, @Query('cxp') cxp: string) {
-    return this.entradasService.getCompras(empresaId, cxp === 'true');
+  async findCompras(
+    @Query('empresa_id') empresaId: number,
+    @Query('cxp') cxp: string,
+    @Query('scope') scope?: string,
+    @Query('cursor') cursor?: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.entradasService.getCompras(
+      Number(empresaId),
+      cxp === 'true',
+      scope || 'tienda',
+      cursor ? Number(cursor) : undefined,
+      limit ? Number(limit) : 30,
+    );
   }
 
   @Get('movimientos')
