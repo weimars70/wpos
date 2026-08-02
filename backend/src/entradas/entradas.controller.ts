@@ -43,4 +43,25 @@ export class EntradasController {
   async searchProveedores(@Query('q') q: string) {
     return this.entradasService.getProveedores(q || '');
   }
+
+  @Get('item-tallas')
+  async getTallasByItem(
+    @Query('item') item: string,
+    @Query('empresa_id') empresaId: number,
+  ) {
+    return this.entradasService.getTallasByItem(item, Number(empresaId));
+  }
+
+  @Get('item-colores')
+  async getColoresByItemTalla(
+    @Query('item') item: string,
+    @Query('talla') talla: string,
+    @Query('empresa_id') empresaId: number,
+  ) {
+    return this.entradasService.getColoresByItemTalla(
+      item,
+      talla,
+      Number(empresaId),
+    );
+  }
 }
