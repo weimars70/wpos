@@ -34,22 +34,52 @@ export class EntradasService {
     );
   }
 
-  async getCompras(empresaId: number, cxpOnly: boolean) {
-    let query = `SELECT codigo, fechahora AS fecha, proveedor_ident AS ident, proveedor_nombre AS nombre, subtotal, iva, total, saldo, empresa_id FROM public.view_compras WHERE empresa_id = $1`;
-    const params = [empresaId];
-
-    if (cxpOnly) {
-      query += ` AND saldo > 0`;
+  async getCompras(
+    empresaId: number,
+    cxpOnly: boolean,
+    scope: string = 'tienda',
+    cursor?: number,
+    limit: number = 30,
+  ) {
+    let whereClause = `WHERE empresa_id = $1`;
+    if (scope === 'grupo') {
+      whereClause = `WHERE empresa_id IN (
+        SELECT id FROM public.empresas 
+        WHERE grupo_empresarial = (SELECT grupo_empresarial FROM public.empresas WHERE id = $1)
+      )`;
     }
 
-    query += ` ORDER BY codigo DESC LIMIT 100`;
+    const params: any[] = [empresaId];
+
+    if (cxpOnly) {
+      whereClause += ` AND saldo > 0`;
+    }
+
+    if (cursor) {
+      params.push(cursor);
+      whereClause += ` AND codigo < $${params.length}`;
+    }
+
+    params.push(limit);
+    const limitParamIndex = params.length;
+
+    const query = `
+      SELECT codigo, fechahora AS fecha, proveedor_ident AS ident, proveedor_nombre AS nombre, 
+             subtotal, iva, total, saldo, empresa_id, n_sucursal 
+      FROM public.view_compras 
+      ${whereClause} 
+      ORDER BY codigo DESC 
+      LIMIT $${limitParamIndex}
+    `;
 
     try {
-      const result = await this.dataSource.query(query, params);
-      return result;
+      const items = await this.dataSource.query(query, params);
+      const nextCursor = items.length > 0 ? Number(items[items.length - 1].codigo) : null;
+      const hasMore = items.length === Number(limit);
+      return { items, nextCursor, hasMore };
     } catch (err) {
       console.error(err);
-      return [];
+      return { items: [], nextCursor: null, hasMore: false };
     }
   }
 
