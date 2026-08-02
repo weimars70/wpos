@@ -1,14 +1,14 @@
 <template>
   <q-layout view="lHh Lpr lFf" class="bg-grey-2">
-    <q-header class="bg-white text-grey-9 q-py-sm" style="border-bottom: 1px solid rgba(0,0,0,0.05)">
+    <q-header class="bg-white q-py-sm text-primary" style="border-bottom: 1px solid rgba(0,0,0,0.05)">
       <q-toolbar>
         <q-btn flat dense round icon="menu" @click="drawer = !drawer" class="q-mr-sm" />
-        <q-toolbar-title class="text-weight-bold text-gradient">WOPOS</q-toolbar-title>
+        <q-toolbar-title class="text-weight-bold text-primary">WOPOS</q-toolbar-title>
         
         <q-space />
 
         <div class="flex items-center q-gutter-sm">
-          <q-chip outline color="primary" icon="business" class="gt-xs">
+          <q-chip outline color="primary" icon="business" class="gt-xs text-primary">
             {{ empresaNombre }}
           </q-chip>
           
@@ -27,36 +27,37 @@
           </q-btn-dropdown>
         </div>
       </q-toolbar>
+      <hr>
     </q-header>
-
+    
     <q-drawer
       v-model="drawer"
       show-if-above
       :width="260"
-      class="bg-white"
-    >
+      class="page-background"
+      >
       <div class="q-pa-md text-center q-mt-md">
-        <div class="text-h6 text-weight-bold text-primary">SISTEMA WPOS</div>
-        <div class="text-caption text-grey-6">v1.2.0</div>
+        <div class="text-h6 text-weight-bold text-white">SISTEMA WPOS</div>
+        <div class="text-caption text-white">v1.2.0</div>
       </div>
 
       <q-list padding class="q-mt-md">
-        <q-item clickable v-ripple to="/dashboard" active-class="bg-blue-1 text-primary shadow-1" class="q-mx-sm rounded-borders q-mb-xs">
+        <q-item clickable v-ripple to="/dashboard" active-class="bg-blue-1 text-primary shadow-1" class="q-mx-sm rounded-borders q-mb-xs text-white">
           <q-item-section avatar><q-icon name="dashboard" /></q-item-section>
-          <q-item-section class="text-weight-medium">Dashboard</q-item-section>
+          <q-item-section class="text-weight-medium text-white">Dashboard</q-item-section>
         </q-item>
 
-        <q-item clickable v-ripple to="/users" active-class="bg-blue-1 text-primary shadow-1" class="q-mx-sm rounded-borders q-mb-xs">
+        <q-item clickable v-ripple to="/users" active-class="bg-blue-1 text-primary shadow-1" class="q-mx-sm rounded-borders q-mb-xs text-white">
           <q-item-section avatar><q-icon name="people" /></q-item-section>
-          <q-item-section class="text-weight-medium">Usuarios</q-item-section>
+          <q-item-section class="text-weight-medium text-white">Usuarios</q-item-section>
         </q-item>
 
         <q-expansion-item
           icon="menu_book"
           label="Entradas"
-          class="q-mx-sm rounded-borders"
-          header-class="text-weight-medium text-grey-8"
-        >
+          class="q-mx-sm rounded-borders text-white"
+          header-class="text-weight-medium text-white"
+          >
           <q-item clickable v-ripple to="/entradas/listado-compras" active-class="bg-blue-1 text-primary" class="rounded-borders q-ml-md q-mr-sm q-mb-xs">
             <q-item-section avatar><q-icon name="arrow_right" size="xs" /></q-item-section>
             <q-item-section>Listado Compras</q-item-section>
@@ -78,8 +79,8 @@
         <q-expansion-item
           icon="shopping_cart"
           label="Salidas"
-          class="q-mx-sm rounded-borders"
-          header-class="text-weight-medium text-grey-8"
+          class="q-mx-sm rounded-borders text-white"
+          header-class="text-weight-medium text-white"
         >
           <q-item clickable v-ripple to="/salidas/facturas" active-class="bg-blue-1 text-primary" class="rounded-borders q-ml-md q-mr-sm q-mb-xs">
             <q-item-section avatar><q-icon name="receipt_long" size="xs" /></q-item-section>
@@ -94,8 +95,8 @@
         <q-expansion-item
           icon="inventory_2"
           label="Inventario"
-          class="q-mx-sm rounded-borders"
-          header-class="text-weight-medium text-grey-8"
+          class="q-mx-sm rounded-borders text-white"
+          header-class="text-weight-medium text-white"
         >
           <q-item clickable v-ripple to="/inventario/ajuste" active-class="bg-blue-1 text-primary" class="rounded-borders q-ml-md q-mr-sm q-mb-xs">
             <q-item-section avatar><q-icon name="arrow_right" size="xs" /></q-item-section>
@@ -143,8 +144,8 @@
         <q-expansion-item
           icon="folder_special"
           label="Maestros"
-          class="q-mx-sm rounded-borders"
-          header-class="text-weight-medium text-grey-8"
+          class="q-mx-sm rounded-borders text-white"
+          header-class="text-weight-medium text-white"
         >
           <q-item clickable v-ripple to="/maestros/medios-pago" active-class="bg-blue-1 text-primary" class="rounded-borders q-ml-md q-mr-sm q-mb-xs">
             <q-item-section avatar><q-icon name="arrow_right" size="xs" /></q-item-section>
@@ -240,4 +241,17 @@ function handleLogout() {
 .rounded-borders {
   border-radius: 12px;
 }
+
+.page-background {
+    background:#4682B4;    
+}
+
+.text-color{
+  color: white;
+}
+
+hr{
+  border: 1px #2a5298 solid;  
+}
+
 </style>

@@ -1,4 +1,4 @@
-<template>
+<template>  
   <q-page padding>
     <div class="row items-center justify-between q-mb-md">
       <div class="text-h5 text-primary text-weight-bold">Items</div>
@@ -8,7 +8,7 @@
     <div class="row items-center q-mb-md">
       <q-btn-toggle
         v-model="estadoFiltro"
-        toggle-color="primary"
+        toggle-color="primary"        
         outline
         dense
         :options="[
@@ -22,10 +22,10 @@
 
     <!-- Tabla CRUD -->
     <q-table
-      :rows="rows"
+      :rows="rows"      
       :columns="columns"
-      row-key="item"
-      class="rounded-borders shadow-1"
+      row-key="item"      
+      class="rounded-borders header-tablet border-table border-row"      
       :loading="loading"
       no-data-label="No hay datos disponibles"
     >
@@ -559,5 +559,21 @@ async function saveData() {
 .action-btn:hover {
   transform: translateY(-2px) scale(1.12);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15) !important;
+}
+
+.border-table{
+    background:white; 
+    border: 1px blueviolet solid;   
+    color: black;
+}
+
+.border-row :deep(thead tr), .border-row :deep(td) {
+  border-bottom: 1px blue solid;  
+}
+
+.header-tablet :deep(thead th) {
+  background-color:#adc2ad;
+  color:black;
+  font: bold;
 }
 </style>
