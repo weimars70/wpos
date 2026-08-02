@@ -1,6 +1,6 @@
 <template>
-  <q-page padding class="bg-grey-2 aurora-animate">
-    <div class="row items-center justify-between q-mb-md">
+  <q-page class="q-pa-md column no-wrap overflow-hidden bg-grey-2 aurora-animate" style="min-height: unset !important; height: calc(100vh - 95px); max-height: calc(100vh - 95px);">
+    <div class="col-auto row items-center justify-between q-mb-md">
       <div class="row items-center q-gutter-sm">
         <div>
           <div class="row items-center q-gutter-sm">
@@ -25,7 +25,7 @@
     </div>
 
     <!-- Card de Filtros Avanzados (Proveedor y Rango de Fechas) -->
-    <q-card flat class="rounded-borders q-mb-md bg-white shadow-1">
+    <q-card flat class="col-auto rounded-borders q-mb-md bg-white shadow-1">
       <q-card-section class="q-py-sm">
         <div class="row items-center q-col-gutter-md">
           <div class="col-12 col-sm-4 col-md-3">
@@ -77,12 +77,12 @@
     </q-card>
 
     <!-- Scroll Infinito + Tabla de Compras -->
-    <q-infinite-scroll @load="onLoad" :offset="250" :disable="!hasMore || loading">
+    <q-infinite-scroll @load="onLoad" :offset="250" :disable="!hasMore || loading" class="col column no-wrap overflow-hidden">
       <q-table
         :rows="rows"
         :columns="columns"
         row-key="codigo"
-        class="rounded-borders  header-tablet border-tablet border-row scroll-tablet"
+        class="col rounded-borders header-tablet border-table border-row full-height-table"
         :loading="loading"
         :filter="filter"
         no-data-label="No se encontraron registros de compras"
@@ -297,40 +297,33 @@ function formatCurrency(val: number) {
   border-radius: 12px;
 }
 
-.scroll-tablet :deep(.q-table__middle) {
-  max-height:59vh;
-  overflow-y: auto;
-}
-
-.border-tablet{
-    background:white; 
-    border: 1px blueviolet solid;   
-    color: black;
-}
-
-.border-row :deep(thead tr), .border-row :deep(td) {
-  border-bottom: 1px blue solid;  
-}
-
 .header-tablet :deep(thead th) {
-  background-color:#adc2ad;
-  color:black;
-  font: bold;
+  background-color: #adc2ad;
+  color: black;
+  font-weight: bold;
+  position: sticky;
+  top: 0;
+  z-index: 1;
 }
 
-.scroll-tablet :deep(.q-table__middle) {
+.full-height-table {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: 100%;
+  overflow: hidden;
+}
+
+.full-height-table :deep(.q-table__container) {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: 100%;
+}
+
+.full-height-table :deep(.q-table__middle) {
+  flex: 1 1 auto;
+  max-height: 100%;
   overflow-y: auto;
-}
-
-@media (max-width: 1365px) {
-  .scroll-tablet :deep(.q-table__middle) {
-    max-height: 50vh;
-  }
-}
-
-@media (min-width: 1366px) and (max-width: 1920px) {
-  .scroll-tablet :deep(.q-table__middle) {
-    max-height: 55vh;
-  }
 }
 </style>

@@ -1,23 +1,22 @@
 <template>  
-  <q-page padding>
-    <div class="row items-center justify-between q-mb-md">
-      <div class="text-h5 text-primary text-weight-bold">Items</div>
+  <q-page class="q-pa-md column no-wrap overflow-hidden" style="min-height: unset !important; height: calc(100vh - 95px); max-height: calc(100vh - 95px);">
+    <div class="col-auto row items-center justify-between q-mb-md">
+      <div class="row items-center q-gutter-md">
+        <div class="text-h5 text-primary text-weight-bold">Items</div>
+        <q-btn-toggle
+          v-model="estadoFiltro"
+          toggle-color="primary"
+          outline
+          dense
+          :options="[
+            { label: 'Activos', value: 'activos' },
+            { label: 'Inactivos', value: 'inactivos' },
+            { label: 'Todos', value: 'todos' },
+          ]"
+          @update:model-value="fetchRows"
+        />
+      </div>
       <q-btn color="primary" icon="add" label="Agregar Items" @click="openNew" class="shadow-1 q-px-md rounded-borders"/>
-    </div>
-
-    <div class="row items-center q-mb-md">
-      <q-btn-toggle
-        v-model="estadoFiltro"
-        toggle-color="primary"        
-        outline
-        dense
-        :options="[
-          { label: 'Activos', value: 'activos' },
-          { label: 'Inactivos', value: 'inactivos' },
-          { label: 'Todos', value: 'todos' },
-        ]"
-        @update:model-value="fetchRows"
-      />
     </div>
 
     <!-- Tabla CRUD -->
@@ -25,7 +24,7 @@
       :rows="rows"      
       :columns="columns"
       row-key="item"      
-      class="rounded-borders header-tablet border-table border-row scroll-tablet"      
+      class="col rounded-borders header-tablet border-table border-row full-height-table"      
       :loading="loading"
       no-data-label="No hay datos disponibles"
       :pagination="{ rowsPerPage: 0 }"
@@ -574,24 +573,32 @@ async function saveData() {
 }
 
 .header-tablet :deep(thead th) {
-  background-color:#adc2ad;
-  color:black;
-  font: bold;
+  background-color: #adc2ad;
+  color: black;
+  font-weight: bold;
+  position: sticky;
+  top: 0;
+  z-index: 1;
 }
 
-.scroll-tablet :deep(.q-table__middle) {
+.full-height-table {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: 100%;
+  overflow: hidden;
+}
+
+.full-height-table :deep(.q-table__container) {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: 100%;
+}
+
+.full-height-table :deep(.q-table__middle) {
+  flex: 1 1 auto;
+  max-height: 100%;
   overflow-y: auto;
-}
-
-@media (max-width: 1365px) {
-  .scroll-tablet :deep(.q-table__middle) {
-    max-height: 42vh;
-  }
-}
-
-@media (min-width: 1366px) and (max-width: 1920px) {
-  .scroll-tablet :deep(.q-table__middle) {
-    max-height: 55vh;
-  }
 }
 </style>

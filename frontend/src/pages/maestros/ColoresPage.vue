@@ -166,28 +166,20 @@ async function saveData() {
 }
 
 .header-tablet :deep(thead th) {
-  background-color:#adc2ad;
-  color:black;
-  font: bold;
+  background-color: #adc2ad;
+  color: black;
+  font-weight: bold;
+  position: sticky;
+  top: 0;
+  z-index: 1;
 }
 
-.width-tablet{
+.width-tablet {
   width: 50vw;
 }
 
 .scroll-tablet :deep(.q-table__middle) {
   overflow-y: auto;
-}
-
-@media (max-width: 1365px) {
-  .scroll-tablet :deep(.q-table__middle) {
-    max-height: 42vh;
-  }
-}
-
-@media (min-width: 1366px) and (max-width: 1920px) {
-  .scroll-tablet :deep(.q-table__middle) {    
-    max-height: 55vh;    
-  }
+  max-height: calc(100vh - 245px);
 }
 </style>
