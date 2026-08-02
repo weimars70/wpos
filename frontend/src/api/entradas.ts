@@ -72,4 +72,14 @@ export const entradasApi = {
 
   getProveedores: (q: string) =>
     api.get<ProveedorResult[]>('/entradas/proveedores', { params: { q } }),
+
+  getTallasByItem: (item: string, empresaId: number) =>
+    api.get<{ talla: string }[]>('/entradas/item-tallas', {
+      params: { item, empresa_id: empresaId },
+    }),
+
+  getColoresByItemTalla: (item: string, talla: string, empresaId: number) =>
+    api.get<{ cod_color: number; color: string }[]>('/entradas/item-colores', {
+      params: { item, talla, empresa_id: empresaId },
+    }),
 };

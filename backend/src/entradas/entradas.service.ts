@@ -24,13 +24,19 @@ export class EntradasService {
   }
 
   async getProveedores(q: string) {
+    if (!q || q.trim().length < 3) {
+      return [];
+    }
+    const search = `%${q.trim()}%`;
     return this.dataSource.query(
-      `SELECT identificacion, nombres || ' ' || apellido1 || ' ' || apellido2 AS nombres, direccion
+      `SELECT COALESCE(ident, codigo::text) AS identificacion, nombre AS nombres, direccion
        FROM proveedores
-       WHERE UPPER(identificacion) LIKE UPPER('%' || $1 || '%')
-          OR UPPER(nombres) LIKE UPPER('%' || $1 || '%')
-       LIMIT 20`,
-      [q],
+       WHERE UPPER(COALESCE(ident, codigo::text)) LIKE UPPER($1)
+          OR UPPER(nombre) LIKE UPPER($1)
+          OR UPPER(COALESCE(nombre_comercial, '')) LIKE UPPER($1)
+       ORDER BY nombre
+       LIMIT 30`,
+      [search],
     );
   }
 
@@ -111,6 +117,36 @@ export class EntradasService {
     `;
     try {
       return await this.dataSource.query(query, [empresaId]);
+    } catch (err) {
+      console.error(err);
+      return [];
+    }
+  }
+
+  async getTallasByItem(item: string, empresaId: number) {
+    const query = `
+      SELECT DISTINCT talla
+      FROM public.view_inventario
+      WHERE empresa_id = $1 AND item::text = $2 AND talla IS NOT NULL AND TRIM(talla) <> ''
+      ORDER BY talla
+    `;
+    try {
+      return await this.dataSource.query(query, [empresaId, item]);
+    } catch (err) {
+      console.error(err);
+      return [];
+    }
+  }
+
+  async getColoresByItemTalla(item: string, talla: string, empresaId: number) {
+    const query = `
+      SELECT DISTINCT cod_color, color
+      FROM public.view_inventario
+      WHERE empresa_id = $1 AND item::text = $2 AND talla = $3 AND cod_color IS NOT NULL
+      ORDER BY color
+    `;
+    try {
+      return await this.dataSource.query(query, [empresaId, item, talla]);
     } catch (err) {
       console.error(err);
       return [];

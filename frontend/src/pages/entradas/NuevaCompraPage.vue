@@ -136,6 +136,7 @@
             outlined
             dense
             class="q-input-premium"
+            @update:model-value="onTallaSelected"
           />
         </div>
         <div class="col-12 col-md-1">
@@ -169,16 +170,17 @@
         </div>
         <div class="col-12 col-md-2">
           <q-input
-            v-model.number="itemRow.pcompra"
+            v-model="itemRow.pcompraDisplay"
             label="Precio Compra"
-            type="number"
             dark
             label-color="green-2"
             outlined
             dense
             class="q-input-premium"
+            input-class="text-right"
             prefix="$"
-            @update:model-value="recalcItem"
+            @update:model-value="onPcompraInput"
+            @blur="onPcompraBlur"
           />
         </div>
         <div class="col-12 col-md-1">
@@ -191,13 +193,14 @@
             outlined
             dense
             class="q-input-premium"
+            input-class="text-right"
             @update:model-value="recalcItem"
             @keyup.enter="addItem"
           />
         </div>
         <div class="col-12 col-md-2">
           <q-input
-            v-model="itemRow.subtotal"
+            :model-value="subtotalDisplay"
             label="Subtotal"
             dark
             label-color="green-2"
@@ -205,6 +208,7 @@
             dense
             readonly
             class="q-input-premium bg-blue-grey-10"
+            input-class="text-right"
             prefix="$"
           />
         </div>
@@ -255,18 +259,18 @@
           <div class="row q-mb-sm">
             <div class="text-green-2 opacity-70">Subtotal</div>
             <q-space />
-            <div class="text-weight-bold">$ {{ totales.subtotal }}</div>
+            <div class="text-weight-bold">$ {{ formatCurrency(totales.subtotal) }}</div>
           </div>
           <div class="row q-mb-sm">
             <div class="text-green-2 opacity-70">Iva</div>
             <q-space />
-            <div class="text-weight-bold">$ {{ totales.iva }}</div>
+            <div class="text-weight-bold">$ {{ formatCurrency(totales.iva) }}</div>
           </div>
           <q-separator dark class="q-my-sm opacity-20" />
           <div class="row items-center q-mt-sm">
             <div class="text-h6 text-green-2 text-weight-bold">TOTAL COMPRA</div>
             <q-space />
-            <div class="text-h4 text-weight-bold text-gradient">$ {{ totales.total }}</div>
+            <div class="text-h4 text-weight-bold text-gradient">$ {{ formatCurrency(totales.total) }}</div>
           </div>
         </div>
       </div>
@@ -299,6 +303,34 @@ const guardando = ref(false);
 const mediosPago = ref<any[]>([]);
 const proveedorOptions = ref<any[]>([]);
 
+function formatCurrency(val: number | string): string {
+  const num = Number(val) || 0;
+  return new Intl.NumberFormat('es-CO', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2
+  }).format(num);
+}
+
+function parseFormattedNumber(val: string): number {
+  if (!val) return 0;
+  let cleaned = val.toString().trim();
+  if (cleaned.includes('.') && cleaned.includes(',')) {
+    cleaned = cleaned.replace(/\./g, '').replace(',', '.');
+  } else if (cleaned.includes('.')) {
+    const parts = cleaned.split('.');
+    if (parts.length > 2) {
+      cleaned = cleaned.replace(/\./g, '');
+    } else if (parts.length === 2 && parts[1].length === 3 && Number(parts[0]) > 0) {
+      cleaned = cleaned.replace(/\./g, '');
+    }
+  } else if (cleaned.includes(',')) {
+    cleaned = cleaned.replace(',', '.');
+  }
+  cleaned = cleaned.replace(/[^0-9.]/g, '');
+  const parsed = parseFloat(cleaned);
+  return isNaN(parsed) ? 0 : parsed;
+}
+
 // --- Items ---
 const items = ref<any[]>([]);
 const itemRow = reactive({
@@ -308,9 +340,14 @@ const itemRow = reactive({
   talla: '',
   cod_color: '' as any,
   cantidad: 1,
+  pcompraDisplay: '',
   pcompra: 0,
   iva: 0,
-  subtotal: '0.00'
+  subtotal: 0
+});
+
+const subtotalDisplay = computed(() => {
+  return formatCurrency(itemRow.subtotal);
 });
 
 const productoOptions = ref<any[]>([]);
@@ -319,30 +356,50 @@ const colorOptions = ref<any[]>([]);
 
 onMounted(async () => {
   try {
-    const [mediosRes, coloresRes] = await Promise.all([
-      salidasApi.getMediosPago(),
-      coloresApi.getAll()
-    ]);
+    const mediosRes = await salidasApi.getMediosPago();
     mediosPago.value = mediosRes.data;
-    colorOptions.value = coloresRes.data.map(c => ({ label: c.descripcion, value: c.codigo }));
-    
-    // Tallas quemadas por ahora o cargar de algún lugar
-    tallaOptions.value = ['S', 'M', 'L', 'XL', '28', '30', '32', '34'].map(t => ({ label: t, value: t }));
   } catch (err) {
     console.error(err);
   }
 });
 
 // --- Logic ---
+function onPcompraInput(val: string) {
+  itemRow.pcompraDisplay = val;
+  itemRow.pcompra = parseFormattedNumber(val);
+  recalcItem();
+}
+
+function onPcompraBlur() {
+  if (itemRow.pcompra > 0) {
+    itemRow.pcompraDisplay = formatCurrency(itemRow.pcompra);
+  } else {
+    itemRow.pcompraDisplay = '';
+  }
+}
+
 async function filterProveedores(val: string, update: any) {
-  const { data } = await entradasApi.getProveedores(val);
-  update(() => {
-    proveedorOptions.value = data.map(p => ({
-      label: `${p.identificacion} - ${p.nombres}`,
-      value: p.identificacion,
-      data: p
-    }));
-  });
+  if (!val || val.trim().length < 3) {
+    update(() => {
+      proveedorOptions.value = [];
+    });
+    return;
+  }
+  try {
+    const { data } = await entradasApi.getProveedores(val.trim());
+    update(() => {
+      proveedorOptions.value = (data || []).map(p => ({
+        label: `${p.identificacion || ''} - ${p.nombres || ''}`,
+        value: p.identificacion,
+        data: p
+      }));
+    });
+  } catch (err) {
+    console.error('Error al cargar proveedores:', err);
+    update(() => {
+      proveedorOptions.value = [];
+    });
+  }
 }
 
 function onProveedorSelected(val: any) {
@@ -352,28 +409,81 @@ function onProveedorSelected(val: any) {
 }
 
 async function filterProductos(val: string, update: any) {
-  const { data } = await salidasApi.getItems(val);
-  update(() => {
-    productoOptions.value = data.map(p => ({
-      label: `${p.item} - ${p.descripcion}`,
-      value: p.item,
-      data: p
-    }));
-  });
+  if (!val || val.trim().length < 3) {
+    update(() => {
+      productoOptions.value = [];
+    });
+    return;
+  }
+  try {
+    const { data } = await salidasApi.getItems(val.trim());
+    update(() => {
+      productoOptions.value = (data || []).map(p => ({
+        label: `${p.item} - ${p.descripcion}`,
+        value: p.item,
+        data: p
+      }));
+    });
+  } catch (err) {
+    console.error('Error al cargar productos:', err);
+    update(() => {
+      productoOptions.value = [];
+    });
+  }
 }
 
-function onItemSelected(val: any) {
+async function onItemSelected(val: any) {
   if (!val) return;
   itemRow.item = val.data.item;
   itemRow.nombre = val.data.descripcion;
   itemRow.iva = val.data.por_iva || 0;
   itemRow.pcompra = val.data.ult_pcompra || 0;
+  itemRow.pcompraDisplay = itemRow.pcompra > 0 ? formatCurrency(itemRow.pcompra) : '';
+  itemRow.talla = '';
+  itemRow.cod_color = null;
+  tallaOptions.value = [];
+  colorOptions.value = [];
   recalcItem();
+
+  const empresaId = authStore.user?.empresaId || 0;
+  if (empresaId && itemRow.item) {
+    try {
+      const { data } = await entradasApi.getTallasByItem(String(itemRow.item), Number(empresaId));
+      tallaOptions.value = data.map((t: any) => ({ label: t.talla, value: t.talla }));
+      if (tallaOptions.value.length === 1) {
+        itemRow.talla = tallaOptions.value[0].value;
+        await onTallaSelected(itemRow.talla);
+      }
+    } catch (err) {
+      console.error('Error al obtener tallas:', err);
+    }
+  }
+}
+
+async function onTallaSelected(talla: string) {
+  itemRow.cod_color = null;
+  colorOptions.value = [];
+  if (!talla || !itemRow.item) return;
+
+  const empresaId = authStore.user?.empresaId || 0;
+  if (empresaId) {
+    try {
+      const { data } = await entradasApi.getColoresByItemTalla(String(itemRow.item), talla, Number(empresaId));
+      colorOptions.value = data.map((c: any) => ({
+        label: `${c.cod_color} - ${c.color || 'Sin nombre'}`,
+        value: c.cod_color
+      }));
+      if (colorOptions.value.length === 1) {
+        itemRow.cod_color = colorOptions.value[0].value;
+      }
+    } catch (err) {
+      console.error('Error al obtener colores:', err);
+    }
+  }
 }
 
 function recalcItem() {
-  const sub = itemRow.cantidad * itemRow.pcompra;
-  itemRow.subtotal = sub.toFixed(2);
+  itemRow.subtotal = itemRow.cantidad * itemRow.pcompra;
 }
 
 function addItem() {
@@ -387,14 +497,15 @@ function addItem() {
     pcompra: itemRow.pcompra,
     pdesc: 0,
     por_iva: itemRow.iva,
-    subtotal: Number(itemRow.subtotal)
+    subtotal: itemRow.subtotal
   });
   // Reset
   itemRow.itemObj = null;
   itemRow.item = '';
   itemRow.cantidad = 1;
   itemRow.pcompra = 0;
-  itemRow.subtotal = '0.00';
+  itemRow.pcompraDisplay = '';
+  itemRow.subtotal = 0;
 }
 
 function removeItem(index: number) {
@@ -402,12 +513,12 @@ function removeItem(index: number) {
 }
 
 const totales = computed(() => {
-  const sub = items.value.reduce((acc, curr) => acc + curr.subtotal, 0);
-  const iva = items.value.reduce((acc, curr) => acc + (curr.subtotal * (curr.por_iva / 100)), 0);
+  const sub = items.value.reduce((acc, curr) => acc + (Number(curr.subtotal) || 0), 0);
+  const iva = items.value.reduce((acc, curr) => acc + ((Number(curr.subtotal) || 0) * ((Number(curr.por_iva) || 0) / 100)), 0);
   return {
-    subtotal: sub.toFixed(2),
-    iva: iva.toFixed(2),
-    total: (sub + iva).toFixed(2)
+    subtotal: sub,
+    iva: iva,
+    total: sub + iva
   };
 });
 
@@ -427,16 +538,18 @@ async function guardar() {
         forma_pago: compra.formaPago,
         plazo: compra.plazo,
         tipo: 1, // Tipo compra
-        total: Number(totales.value.total),
-        subtotal: Number(totales.value.subtotal),
-        iva: Number(totales.value.iva),
+        total: Number(totales.value.total.toFixed(2)),
+        subtotal: Number(totales.value.subtotal.toFixed(2)),
+        iva: Number(totales.value.iva.toFixed(2)),
         descuento: 0,
         vendedor: authStore.user?.name || 'SISTEMA',
         observaciones: compra.observaciones
       },
       det: items.value.map(i => ({
         ...i,
-        pfinaliva: i.pcompra * (1 + i.por_iva / 100)
+        pcompra: Number(Number(i.pcompra).toFixed(2)),
+        subtotal: Number(Number(i.subtotal).toFixed(2)),
+        pfinaliva: Number((Number(i.pcompra) * (1 + Number(i.por_iva) / 100)).toFixed(2))
       }))
     };
     
@@ -458,9 +571,9 @@ const columns = [
   { name: 'talla', label: 'Talla', align: 'center', field: 'talla' },
   { name: 'color', label: 'Color', align: 'center', field: 'color' },
   { name: 'cantidad', label: 'Cant', align: 'center', field: 'cantidad' },
-  { name: 'pcompra', label: 'P. Compra', align: 'right', field: 'pcompra', format: (val: any) => `$${val.toFixed(2)}` },
+  { name: 'pcompra', label: 'P. Compra', align: 'right', field: 'pcompra', format: (val: any) => `$ ${formatCurrency(val)}` },
   { name: 'por_iva', label: '%IVA', align: 'center', field: 'por_iva' },
-  { name: 'subtotal', label: 'Subtotal', align: 'right', field: 'subtotal', format: (val: any) => `$${val.toFixed(2)}` },
+  { name: 'subtotal', label: 'Subtotal', align: 'right', field: 'subtotal', format: (val: any) => `$ ${formatCurrency(val)}` },
   { name: 'acciones', label: '', align: 'center' },
 ];
 </script>
