@@ -5,7 +5,7 @@ export interface RegisterPayload { name: string; email: string; password: string
 
 export const authApi = {
   login: (payload: LoginPayload) =>
-    api.post<{ access_token: string; user: any }>('/auth/login', payload),
+    api.post<{ access_token: string; user: any }>('/api/auth/login', payload),
   register: (payload: RegisterPayload) =>
-    api.post('/auth/register', payload),
+    api.post('/api/auth/register', payload),
 };

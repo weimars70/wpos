@@ -51,20 +51,20 @@ export interface ClienteResult {
 
 export const salidasApi = {
   registrarFactura: (payload: CreateFacturaPayload) =>
-    api.post<{ rpta: string | number }>('/salidas/facturas', payload),
+    api.post<{ rpta: string | number }>('/api/salidas/facturas', payload),
 
   getFacturas: (empresaId: number) =>
-    api.get('/salidas/facturas', { params: { empresaId } }),
+    api.get('/api/salidas/facturas', { params: { empresaId } }),
 
   getItems: (q: string) =>
-    api.get<any[]>('/salidas/items', { params: { q } }),
+    api.get<any[]>('/api/salidas/items', { params: { q } }),
 
   getClientes: (q: string) =>
-    api.get<ClienteResult[]>('/salidas/clientes', { params: { q } }),
+    api.get<ClienteResult[]>('/api/salidas/clientes', { params: { q } }),
 
   getInventario: (item: string, empresa_id: number) =>
-    api.get<any[]>('/salidas/inventario', { params: { item, empresa_id } }),
+    api.get<any[]>('/api/salidas/inventario', { params: { item, empresa_id } }),
 
   getMediosPago: () =>
-    api.get<MedioPago[]>('/salidas/medios-pago'),
+    api.get<MedioPago[]>('/api/salidas/medios-pago'),
 };

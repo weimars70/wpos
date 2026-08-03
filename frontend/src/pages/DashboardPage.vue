@@ -121,7 +121,7 @@ const fetchStats = async () => {
     loading.value = true;
     const empresaId = authStore.user?.empresaId;
     if (empresaId) {
-      const { data } = await api.get('/dashboard/summary', {
+      const { data } = await api.get('/api/dashboard/summary', {
         params: { empresaId }
       });
       stats.value = data;

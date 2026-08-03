@@ -21,7 +21,7 @@ export const useAuthStore = defineStore('auth', () => {
     console.log(`[AuthStore] Intentando login para ${usuario} en empresa ${empresaId}...`);
     try {
       const { data } = await api.post<{ access_token: string }>(
-        '/auth/login',
+        '/api/auth/login',
         { usuario, empresaId, password },
       );
       console.log('[AuthStore] Login exitoso, recibiendo token.');
@@ -45,9 +45,9 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function getEmpresas(usuario: string) {
-    console.log(`[AuthStore] GET /auth/empresas/${usuario}`);
+    console.log(`[AuthStore] GET /api/auth/empresas/${usuario}`);
     try {
-      const { data } = await api.get(`/auth/empresas/${usuario}`);
+      const { data } = await api.get(`/api/auth/empresas/${usuario}`);
       return data as { id: number; nombre: string }[];
     } catch (error) {
       console.error('[AuthStore] Error en getEmpresas:', error);
@@ -59,7 +59,7 @@ export const useAuthStore = defineStore('auth', () => {
     console.log(`[AuthStore] Validando credenciales para ${usuario}...`);
     try {
       const { data } = await api.post<{ id: number; nombre: string }[]>(
-        '/auth/validate',
+        '/api/auth/validate',
         { usuario, password },
       );
       return data;

@@ -42,7 +42,7 @@ export interface ProveedorResult {
 
 export const entradasApi = {
   registrarCompra: (payload: CreateCompraPayload) =>
-    api.post<{ rpta: string | number }>('/entradas/registrar-compra', payload),
+    api.post<{ rpta: string | number }>('/api/entradas/registrar-compra', payload),
 
   getCompras: (
     empresaId: number,
@@ -54,7 +54,7 @@ export const entradasApi = {
     fechaInicio?: string,
     fechaFin?: string,
   ) =>
-    api.get<{ items: any[]; nextCursor: number | null; hasMore: boolean }>('/entradas/compras', {
+    api.get<{ items: any[]; nextCursor: number | null; hasMore: boolean }>('/api/entradas/compras', {
       params: {
         empresa_id: empresaId,
         cxp: cxp.toString(),
@@ -68,18 +68,18 @@ export const entradasApi = {
     }),
 
   getMovimientos: (empresaId: number) =>
-    api.get<any[]>('/entradas/movimientos', { params: { empresa_id: empresaId } }),
+    api.get<any[]>('/api/entradas/movimientos', { params: { empresa_id: empresaId } }),
 
   getProveedores: (q: string) =>
-    api.get<ProveedorResult[]>('/entradas/proveedores', { params: { q } }),
+    api.get<ProveedorResult[]>('/api/entradas/proveedores', { params: { q } }),
 
   getTallasByItem: (item: string, empresaId: number) =>
-    api.get<{ talla: string }[]>('/entradas/item-tallas', {
+    api.get<{ talla: string }[]>('/api/entradas/item-tallas', {
       params: { item, empresa_id: empresaId },
     }),
 
   getColoresByItemTalla: (item: string, talla: string, empresaId: number) =>
-    api.get<{ cod_color: number; color: string }[]>('/entradas/item-colores', {
+    api.get<{ cod_color: number; color: string }[]>('/api/entradas/item-colores', {
       params: { item, talla, empresa_id: empresaId },
     }),
 };

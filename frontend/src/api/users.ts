@@ -33,13 +33,13 @@ export interface EmpresaGrupo {
 }
 
 export const usersApi = {
-  getAll: () => api.get<User[]>('/users'),
-  getOne: (id: string | number) => api.get<User>(`/users/${id}`),
-  getEmpresasGrupo: () => api.get<EmpresaGrupo[]>('/users/empresas-grupo'),
+  getAll: () => api.get<User[]>('/api/users'),
+  getOne: (id: string | number) => api.get<User>(`/api/users/${id}`),
+  getEmpresasGrupo: () => api.get<EmpresaGrupo[]>('/api/users/empresas-grupo'),
   getUserEmpresas: (email: string) =>
-    api.get<number[]>(`/users/user-empresas?email=${encodeURIComponent(email)}`),
-  create: (payload: CreateUserPayload) => api.post<User>('/users', payload),
+    api.get<number[]>(`/api/users/user-empresas?email=${encodeURIComponent(email)}`),
+  create: (payload: CreateUserPayload) => api.post<User>('/api/users', payload),
   update: (id: string | number, payload: UpdateUserPayload) =>
-    api.put<User>(`/users/${id}`, payload),
-  remove: (id: string | number) => api.delete(`/users/${id}`),
+    api.put<User>(`/api/users/${id}`, payload),
+  remove: (id: string | number) => api.delete(`/api/users/${id}`),
 };

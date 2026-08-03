@@ -317,7 +317,7 @@ function normalizeImagePath(img: any): string {
   const filename = clean.split(/[/\\]/).pop() || '';
   if (!filename || filename === 'null' || filename === 'undefined' || filename === '[object Object]') return '';
 
-  const baseUrl = (api.defaults.baseURL || 'http://localhost:3000').replace(/\/+$/, '');
+  const baseUrl = (api.defaults.baseURL || 'http://localhost:3037').replace(/\/+$/, '');
   return `${baseUrl}/uploads/items/${filename}`;
 }
 

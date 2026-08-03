@@ -98,17 +98,17 @@ export interface GetAjustesParams {
 
 export const inventarioApi = {
   getSedes: () =>
-    api.get<SedeItem[]>('/inventario/sedes'),
+    api.get<SedeItem[]>('/api/inventario/sedes'),
 
   getListado: (params?: GetInventarioParams) =>
-    api.get<ListadoInventarioResponse>('/inventario/listado', { params }),
+    api.get<ListadoInventarioResponse>('/api/inventario/listado', { params }),
 
   getGeneral: (params?: GetInventarioGeneralParams) =>
-    api.get<ListadoInventarioResponse>('/inventario/general', { params }),
+    api.get<ListadoInventarioResponse>('/api/inventario/general', { params }),
 
   getSinInventario: (params?: GetInventarioParams) =>
-    api.get<ListadoInventarioResponse>('/inventario/sin-inventario', { params }),
+    api.get<ListadoInventarioResponse>('/api/inventario/sin-inventario', { params }),
 
   getAjustes: (params?: GetAjustesParams) =>
-    api.get<ListadoAjustesResponse>('/inventario/ajustes', { params }),
+    api.get<ListadoAjustesResponse>('/api/inventario/ajustes', { params }),
 };
