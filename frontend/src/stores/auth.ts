@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
-import axios from 'axios';
+import { api } from '../boot/axios';
 
 export interface AuthUser {
   id: number;
@@ -8,16 +8,6 @@ export interface AuthUser {
   roleId: number;
   name: string;
 }
-
-const getApiUrl = () => {
-  if (typeof window !== 'undefined') {
-    // Si estamos en el navegador, usamos el hostname actual pero puerto 3000
-    return `http://${window.location.hostname}:3000`;
-  }
-  return 'http://localhost:3000';
-};
-
-const API_URL = getApiUrl();
 
 export const useAuthStore = defineStore('auth', () => {
   const token = ref<string | null>(localStorage.getItem('token'));
@@ -30,8 +20,8 @@ export const useAuthStore = defineStore('auth', () => {
   async function login(usuario: string, empresaId: number, password: string) {
     console.log(`[AuthStore] Intentando login para ${usuario} en empresa ${empresaId}...`);
     try {
-      const { data } = await axios.post<{ access_token: string }>(
-        `${API_URL}/auth/login`,
+      const { data } = await api.post<{ access_token: string }>(
+        '/auth/login',
         { usuario, empresaId, password },
       );
       console.log('[AuthStore] Login exitoso, recibiendo token.');
@@ -55,9 +45,9 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function getEmpresas(usuario: string) {
-    console.log(`[AuthStore] GET ${API_URL}/auth/empresas/${usuario}`);
+    console.log(`[AuthStore] GET /auth/empresas/${usuario}`);
     try {
-      const { data } = await axios.get(`${API_URL}/auth/empresas/${usuario}`);
+      const { data } = await api.get(`/auth/empresas/${usuario}`);
       return data as { id: number; nombre: string }[];
     } catch (error) {
       console.error('[AuthStore] Error en getEmpresas:', error);
@@ -68,8 +58,8 @@ export const useAuthStore = defineStore('auth', () => {
   async function validateCredentials(usuario: string, password: string) {
     console.log(`[AuthStore] Validando credenciales para ${usuario}...`);
     try {
-      const { data } = await axios.post<{ id: number; nombre: string }[]>(
-        `${API_URL}/auth/validate`,
+      const { data } = await api.post<{ id: number; nombre: string }[]>(
+        '/auth/validate',
         { usuario, password },
       );
       return data;

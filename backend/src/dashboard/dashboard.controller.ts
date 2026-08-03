@@ -2,7 +2,7 @@ import { Controller, Get, Query, ParseIntPipe, UseGuards } from '@nestjs/common'
 import { DashboardService } from './dashboard.service';
 import { AuthGuard } from '@nestjs/passport';
 
-@Controller('dashboard')
+@Controller('api/dashboard')
 export class DashboardController {
   constructor(private readonly dashboardService: DashboardService) {}
 

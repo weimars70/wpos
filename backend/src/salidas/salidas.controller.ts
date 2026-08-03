@@ -12,7 +12,7 @@ import { SalidasService } from './salidas.service';
 import { CreateFacturaDto } from './dto/create-factura.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
-@Controller('salidas')
+@Controller('api/salidas')
 export class SalidasController {
   constructor(private readonly salidasService: SalidasService) {}
 

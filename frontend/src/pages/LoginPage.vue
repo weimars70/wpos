@@ -4,7 +4,8 @@
       <q-page class="flex flex-center aurora-animate" style="min-height: 100vh">
         <div class="glass-card q-pa-xl shadow-24" style="width: 100%; max-width: 450px; border: 1px solid rgba(255,255,255,0.1)">
           <div class="text-center q-mb-xl">
-            <div class="text-h3 text-weight-bold text-gradient q-mb-sm">WOPOS</div>
+            <img src="/logo.png" style="max-height: 90px; max-width: 220px; object-fit: contain;" class="q-mb-md" alt="WPOS Logo" />
+            <div class="text-h3 text-weight-bold text-gradient q-mb-sm">WPOS</div>
             <div class="text-white text-body1 text-weight-light opacity-80">
               Gestión Inteligente de Negocios
             </div>
@@ -133,7 +134,7 @@
 
           <div class="text-center q-mt-xl">
             <div class="text-blue-2 text-caption opacity-60">
-              © 2026 Huellas Technology. Todos los derechos reservados.
+              © 2026 WPOS Technology. Todos los derechos reservados.
             </div>
           </div>
         </div>

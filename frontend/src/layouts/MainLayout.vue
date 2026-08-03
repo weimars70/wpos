@@ -3,7 +3,10 @@
     <q-header class="bg-white q-py-sm text-primary" style="border-bottom: 1px solid rgba(0,0,0,0.05)">
       <q-toolbar>
         <q-btn flat dense round icon="menu" @click="drawer = !drawer" class="q-mr-sm" />
-        <q-toolbar-title class="text-weight-bold text-primary">WOPOS</q-toolbar-title>
+        <q-toolbar-title class="text-weight-bold text-primary flex items-center">
+          <img src="/logo.png" style="height: 32px; max-width: 32px; object-fit: contain;" class="q-mr-sm" alt="Logo" />
+          <span>WPOS</span>
+        </q-toolbar-title>
         
         <q-space />
 
@@ -36,7 +39,8 @@
       :width="260"
       class="page-background"
       >
-      <div class="q-pa-md text-center q-mt-md">
+      <div class="q-pa-md text-center q-mt-sm">
+        <img src="/logo.png" style="max-height: 50px; max-width: 120px; object-fit: contain;" class="q-mb-xs" alt="WPOS Logo" />
         <div class="text-h6 text-weight-bold text-white">SISTEMA WPOS</div>
         <div class="text-caption text-white">v1.2.0</div>
       </div>
@@ -195,7 +199,7 @@
       </q-list>
 
       <div class="absolute-bottom q-pa-md flex flex-center">
-        <div class="text-caption text-grey-4">© 2026 Huellas Tech</div>
+        <div class="text-caption text-grey-4">© 2026 WPOS Tech</div>
       </div>
     </q-drawer>
 
