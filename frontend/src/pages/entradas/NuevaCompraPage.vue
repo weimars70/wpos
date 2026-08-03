@@ -489,15 +489,15 @@ function recalcItem() {
 function addItem() {
   if (!itemRow.item) return;
   items.value.push({
-    item: itemRow.item,
-    nombre: itemRow.nombre,
-    talla: itemRow.talla || '0',
-    color: itemRow.cod_color || 0,
-    cantidad: itemRow.cantidad,
-    pcompra: itemRow.pcompra,
+    item: String(itemRow.item),
+    nombre: String(itemRow.nombre || ''),
+    talla: String(itemRow.talla || '0'),
+    color: Number(itemRow.cod_color) || 0,
+    cantidad: Number(itemRow.cantidad) || 1,
+    pcompra: Number(itemRow.pcompra) || 0,
     pdesc: 0,
-    por_iva: itemRow.iva,
-    subtotal: itemRow.subtotal
+    por_iva: Number(itemRow.iva) || 0,
+    subtotal: Number(itemRow.subtotal) || 0
   });
   // Reset
   itemRow.itemObj = null;
@@ -530,37 +530,67 @@ async function guardar() {
   
   guardando.value = true;
   try {
-    const payload: CreateCompraPayload = {
+    const now = new Date();
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const dd = String(now.getDate()).padStart(2, '0');
+    const yyyy = now.getFullYear();
+    const fechaStr = `${mm}/${dd}/${yyyy}`;
+
+    const totalCant = items.value.reduce((acc, curr) => acc + (Number(curr.cantidad) || 0), 0);
+    const empresaId = Number(authStore.user?.empresaId || 0);
+
+    const payload: any = {
       enc: {
-        ident: compra.ident,
-        empresa_id: authStore.user?.empresaId || 0,
-        nombre: compra.nombre,
-        forma_pago: compra.formaPago,
-        plazo: compra.plazo,
+        ident: String(compra.ident),
+        empresa_id: empresaId,
+        sucursal: empresaId,
+        nombre: String(compra.nombre || ''),
+        forma_pago: Number(compra.formaPago || 1),
+        plazo: Number(compra.plazo || 0),
         tipo: 1, // Tipo compra
         total: Number(totales.value.total.toFixed(2)),
         subtotal: Number(totales.value.subtotal.toFixed(2)),
         iva: Number(totales.value.iva.toFixed(2)),
         descuento: 0,
-        vendedor: authStore.user?.name || 'SISTEMA',
-        observaciones: compra.observaciones
+        vendedor: String(authStore.user?.name || 'SISTEMA'),
+        observaciones: String(compra.observaciones || ''),
+        fecha: fechaStr,
+        factura: '0',
+        cantidad_total: totalCant,
+        valor_abono: 0
       },
       det: items.value.map(i => ({
-        ...i,
-        pcompra: Number(Number(i.pcompra).toFixed(2)),
-        subtotal: Number(Number(i.subtotal).toFixed(2)),
-        pfinaliva: Number((Number(i.pcompra) * (1 + Number(i.por_iva) / 100)).toFixed(2))
+        item: String(i.item),
+        nombre: String(i.nombre || ''),
+        talla: String(i.talla || '0'),
+        color: Number(i.color) || 0,
+        cantidad: Number(i.cantidad) || 0,
+        pcompra: Number(Number(i.pcompra || 0).toFixed(2)),
+        pventa: Number(Number(i.pcompra || 0).toFixed(2)),
+        pdesc: Number(i.pdesc || 0),
+        por_iva: Number(i.por_iva || 0),
+        subtotal: Number(Number(i.subtotal || 0).toFixed(2)),
+        pcfinal: Number(Number(i.pcompra || 0).toFixed(2)),
+        pcfinaliva: Number((Number(i.pcompra || 0) * (1 + Number(i.por_iva || 0) / 100)).toFixed(2)),
+        pfinaliva: Number((Number(i.pcompra || 0) * (1 + Number(i.por_iva || 0) / 100)).toFixed(2))
       }))
     };
     
     const { data } = await entradasApi.registrarCompra(payload);
     if (data.rpta) {
       $q.notify({ type: 'positive', message: 'Compra registrada con éxito: ' + data.rpta });
-      // Limpiar formalmente si se requiere
+      // Limpiar datos
+      items.value = [];
+      compra.proveedorObj = null;
+      compra.ident = '';
+      compra.nombre = '';
+      compra.observaciones = '';
     }
-  } catch (err) {
-    console.error(err);
-    $q.notify({ type: 'negative', message: 'Error al registrar compra' });
+  } catch (err: any) {
+    console.error('Error al registrar compra:', err);
+    const apiMsg = err.response?.data?.message;
+    const msgToShow = Array.isArray(apiMsg) ? apiMsg.join(', ') : (apiMsg || 'Error al registrar compra');
+    $q.notify({ type: 'negative', message: 'Error: ' + msgToShow });
   } finally {
     guardando.value = false;
   }

@@ -21,8 +21,10 @@ export class DashboardService {
       `SELECT 
         coalesce(sum(total), 0)::float as total_billing,
         count(*)::int as total_invoices
-       FROM public.facturas 
-       WHERE sucursal = $1 AND created_at::date = current_date`,
+       FROM public.view_salidas 
+       WHERE empresa_id = $1 
+         AND fecha::date = current_date
+         AND (anulado IS NULL OR LOWER(anulado::text) NOT IN ('s', 'si', 'true', '1'))`,
       [empresaId],
     );
 
