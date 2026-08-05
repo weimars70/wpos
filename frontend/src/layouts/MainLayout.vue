@@ -1,6 +1,6 @@
 <template>
-  <q-layout view="lHh Lpr lFf" class="bg-grey-2">
-    <q-header class="bg-white text-primary" style="border-bottom: 1px solid rgba(0,0,0,0.05)">
+  <q-layout view="lHh Lpr lFf" :class="$q.dark.isActive ? 'bg-dark' : 'bg-grey-2'">
+    <q-header :class="$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-primary'" :style="{ borderBottom: $q.dark.isActive ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.05)' }">
       <q-toolbar class="q-py-xs">
         <q-btn flat dense round icon="menu" @click="drawer = !drawer" class="q-mr-sm" />
         <q-toolbar-title class="text-weight-bold text-primary flex items-center">
@@ -14,6 +14,20 @@
           <q-chip outline color="primary" icon="business" class="gt-xs text-primary">
             {{ empresaNombre }}
           </q-chip>
+
+          <q-btn 
+            flat 
+            round 
+            dense
+            :icon="$q.dark.isActive ? 'light_mode' : 'dark_mode'"
+            @click="$q.dark.toggle()"
+            :color="$q.dark.isActive ? 'warning' : 'primary'"
+            class="q-mx-sm"
+            title="Alternar modo oscuro"
+          />
+
+          <!-- Selector de Temas -->
+          <ThemePicker />
           
           <q-btn-dropdown flat no-caps stretch>
             <template #label>
@@ -31,7 +45,7 @@
       </q-toolbar>
 
       <!-- BARRA DE PESTAÑAS (MULTI-TAB SYSTEM) -->
-      <div class="bg-grey-1 text-grey-8 row items-center no-wrap shadow-1" style="border-top: 1px solid rgba(0,0,0,0.05); border-bottom: 1px solid rgba(0,0,0,0.08); min-height: 38px;">
+      <div :class="['row items-center no-wrap shadow-1', $q.dark.isActive ? 'bg-grey-9 text-grey-3' : 'bg-grey-1 text-grey-8']" :style="{ borderTop: $q.dark.isActive ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.05)', borderBottom: $q.dark.isActive ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.08)', minHeight: '38px' }">
         <q-tabs
           v-model="activeTabPath"
           dense
@@ -39,8 +53,8 @@
           inline-label
           outside-arrows
           mobile-arrows
-          active-color="primary"
-          active-bg-color="white"
+          :active-color="$q.dark.isActive ? 'white' : 'primary'"
+          :active-bg-color="$q.dark.isActive ? 'grey-8' : 'white'"
           indicator-color="primary"
           class="col"
           style="min-height: 38px;"
@@ -51,10 +65,10 @@
             :name="tab.path"
             @click="selectTab(tab.path)"
             class="q-px-sm text-weight-medium tab-item"
-            style="min-height: 38px; border-right: 1px solid rgba(0,0,0,0.08);"
+            :style="{ minHeight: '38px', borderRight: $q.dark.isActive ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.08)' }"
           >
             <div class="row items-center no-wrap">
-              <q-icon :name="tab.icon" size="18px" class="q-mr-xs text-primary" />
+              <q-icon :name="tab.icon" size="18px" :class="['q-mr-xs', $q.dark.isActive ? 'text-white' : 'text-primary']" />
               <span class="q-mr-xs" style="font-size: 13px;">{{ tab.title }}</span>
               <q-btn
                 v-if="tab.closable"
@@ -271,6 +285,8 @@ import { ref, computed, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { useAuthStore } from '../stores/auth';
+import { useThemeStore } from '../stores/theme';
+import ThemePicker from '../components/ThemePicker.vue';
 
 interface TabItem {
   title: string;
@@ -283,6 +299,9 @@ const $q = useQuasar();
 const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
+const themeStore = useThemeStore();
+themeStore.initTheme();
+
 const drawer = ref(false);
 
 const empresaNombre = computed(() => {
@@ -420,12 +439,19 @@ function handleLogout() {
 .q-drawer {
   border-right: 1px solid rgba(0,0,0,0.05);
 }
+.body--dark .q-drawer {
+  border-right: 1px solid rgba(255,255,255,0.1);
+}
+
 .rounded-borders {
   border-radius: 12px;
 }
 
 .page-background {
-    background:#4682B4;    
+    background: var(--q-primary, #1976D2);    
+}
+.body--dark .page-background {
+    background: #121212;    
 }
 
 .text-color{
@@ -442,5 +468,13 @@ function handleLogout() {
 
 hr{
   border: 1px #2a5298 solid;  
+}
+.body--dark hr {
+  border-color: #444;
+}
+
+.body--dark .q-item.q-router-link--active {
+  background: rgba(255, 255, 255, 0.15) !important;
+  color: #90caf9 !important;
 }
 </style>

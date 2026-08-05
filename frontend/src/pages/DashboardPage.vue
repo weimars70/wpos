@@ -1,17 +1,17 @@
 <template>
-  <q-page class="q-pa-xl bg-grey-2">
+  <q-page :class="['q-pa-xl', $q.dark.isActive ? 'bg-grey-9' : 'bg-grey-2']">
     <div class="row items-center q-mb-xl">
       <div class="col flex items-center">
         <img src="/logo.png" style="max-height: 55px; max-width: 140px; object-fit: contain;" class="q-mr-md" alt="WPOS Logo" />
         <div>
-          <div class="text-h4 text-weight-bold text-grey-9 q-mb-xs">Panel de Control</div>
-          <div class="text-subtitle1 text-grey-6">
+          <div class="text-h4 text-weight-bold q-mb-xs" :class="$q.dark.isActive ? 'text-white' : 'text-grey-9'">Panel de Control</div>
+          <div class="text-subtitle1" :class="$q.dark.isActive ? 'text-grey-4' : 'text-grey-6'">
             Bienvenido de nuevo, <span class="text-primary text-weight-bold">{{ authStore.user?.name || 'Admin' }}</span>
           </div>
         </div>
       </div>
       <div class="col-auto">
-        <q-btn flat round icon="refresh" color="grey-7" @click="fetchStats" :loading="loading" />
+        <q-btn flat round icon="refresh" :color="$q.dark.isActive ? 'grey-4' : 'grey-7'" @click="fetchStats" :loading="loading" />
       </div>
     </div>
 
@@ -48,12 +48,12 @@
 
       <!-- Facturación Hoy -->
       <div class="col-12 col-sm-6 col-md-4">
-        <q-card flat bordered class="bg-white shadow-2" style="border-radius: 20px">
+        <q-card flat bordered :class="['shadow-2', $q.dark.isActive ? 'bg-dark' : 'bg-white']" style="border-radius: 20px">
           <q-card-section class="q-pa-lg">
             <div class="row items-center no-wrap">
               <div class="col">
-                <div class="text-overline text-grey-6">FACTURACIÓN HOY</div>
-                <div class="text-h3 text-weight-bold text-grey-9">
+                <div class="text-overline" :class="$q.dark.isActive ? 'text-grey-4' : 'text-grey-6'">FACTURACIÓN HOY</div>
+                <div class="text-h3 text-weight-bold" :class="$q.dark.isActive ? 'text-white' : 'text-grey-9'">
                   <q-skeleton v-if="loading" type="text" />
                   <span v-else>${{ stats.todayBilling.toLocaleString() }}</span>
                 </div>
@@ -80,18 +80,18 @@
 
       <!-- Info Sesión (Limpiada) -->
       <div class="col-12 col-md-4">
-        <q-card flat bordered class="bg-white shadow-2" style="border-radius: 20px">
+        <q-card flat bordered :class="['shadow-2', $q.dark.isActive ? 'bg-dark' : 'bg-white']" style="border-radius: 20px">
           <q-card-section class="q-pa-lg">
-            <div class="text-overline text-grey-6">INFO DE SESIÓN</div>
+            <div class="text-overline" :class="$q.dark.isActive ? 'text-grey-4' : 'text-grey-6'">INFO DE SESIÓN</div>
             <div class="row items-center justify-between q-mt-md">
               <div>
-                <div class="text-weight-bold text-grey-9">{{ authStore.user?.name || 'Administrador' }}</div>
-                <div class="text-caption text-grey-6">ID Empresa: {{ authStore.user?.empresaId }}</div>
+                <div class="text-weight-bold" :class="$q.dark.isActive ? 'text-white' : 'text-grey-9'">{{ authStore.user?.name || 'Administrador' }}</div>
+                <div class="text-caption" :class="$q.dark.isActive ? 'text-grey-4' : 'text-grey-6'">ID Empresa: {{ authStore.user?.empresaId }}</div>
               </div>
               <img src="/logo.png" style="max-height: 40px; max-width: 80px; object-fit: contain;" alt="WPOS Logo" />
             </div>
             <div class="q-mt-xl">
-              <div class="text-caption text-grey-5 q-mb-xs">Estado de conexión</div>
+              <div class="text-caption q-mb-xs" :class="$q.dark.isActive ? 'text-grey-4' : 'text-grey-5'">Estado de conexión</div>
               <div class="text-weight-medium text-green flex items-center">
                 <q-badge rounded color="green" class="q-mr-sm" /> En línea
               </div>
@@ -99,6 +99,8 @@
           </q-card-section>
         </q-card>
       </div>
+
+
     </div>
   </q-page>
 </template>
@@ -141,5 +143,11 @@ onMounted(() => {
 <style lang="scss" scoped>
 .bg-white-2 {
   background: rgba(255, 255, 255, 0.2);
+}
+.theme-hover {
+  transition: transform 0.2s ease;
+}
+.theme-hover:hover {
+  transform: translateY(-3px);
 }
 </style>
